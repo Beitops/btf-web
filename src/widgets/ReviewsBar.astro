@@ -1,0 +1,99 @@
+---
+import type { ImageMetadata } from "astro";
+import OptimizedImage from "../components/OptimizedImage.astro";
+import logo from "../assets/logo.png";
+
+const {
+  rating = "4.8",
+  users = "12.5K",
+  label = "Usuarios",
+  avatars = [logo, logo, logo],
+} = Astro.props as {
+  rating?: string;
+  users?: string;
+  label?: string;
+  avatars?: ImageMetadata[];
+};
+---
+
+<div
+  class="reviews-bar mx-auto w-fit rounded-full border border-gray-200 bg-white px-4 py-2 shadow-sm"
+>
+  <div class="relative z-10 flex items-center gap-3">
+    <div class="flex items-center -space-x-2">
+      {
+        avatars.map((avatar) => (
+          <OptimizedImage
+            src={avatar}
+            alt="Avatar de usuario"
+            width={40}
+            height={40}
+            class="h-9 w-9 rounded-full border-2 border-white object-cover"
+          />
+        ))
+      }
+    </div>
+    <div class="flex items-center text-sm md:text-base">
+      <svg
+        class="me-2 h-4 w-4 text-yellow-400"
+        viewBox="0 0 20 20"
+        aria-hidden="true"
+      >
+        <path
+          fill="currentColor"
+          d="M10 1.5l2.47 5.01 5.53.8-4 3.9.95 5.52L10 13.97 5.05 16.73l.95-5.52-4-3.9 5.53-.8L10 1.5z"
+        ></path>
+      </svg>
+      <span class="text-gray-800">
+        Valorado {rating} por {users}
+        {label}
+      </span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .reviews-bar {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .reviews-bar::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: 9999px;
+    padding: 1.5px;
+    background: linear-gradient(
+      120deg,
+      transparent 0%,
+      transparent 44%,
+      #FFD500 50%,
+      transparent 56%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    background-position: 0% 50%;
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: reviews-bar-shine 10s ease infinite;
+    opacity: 1;
+    filter: drop-shadow(0 0 6px var(--color-primary));
+    z-index: 0;
+  }
+
+  @keyframes reviews-bar-shine {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+</style>

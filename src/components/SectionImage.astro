@@ -1,0 +1,55 @@
+---
+type ImagePosition = 'left' | 'right';
+
+interface Props {
+	imageSrc?: string;
+	imageAlt?: string;
+	imagePosition?: ImagePosition;
+}
+
+const {
+	imageSrc,
+	imageAlt = 'Imagen',
+	imagePosition = 'left',
+} = Astro.props;
+
+const isImageLeft = imagePosition !== 'right';
+---
+
+<section class="bg-white py-12 px-6">
+	<div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 items-center gap-8">
+		{isImageLeft ? (
+			<div class="flex justify-center">
+				{imageSrc ? (
+					<img
+						class="w-full max-w-xs aspect-2/3 object-cover rounded-[40px] border border-black"
+						src={imageSrc}
+						alt={imageAlt}
+						loading="lazy"
+						decoding="async"
+					/>
+				) : (
+					<div class="w-full max-w-xs aspect-2/3 rounded-[40px] border border-black bg-white"></div>
+				)}
+			</div>
+		) : null}
+		<div class="text-left">
+			<slot />
+		</div>
+		{!isImageLeft ? (
+			<div class="flex justify-center">
+				{imageSrc ? (
+					<img
+						class="w-full max-w-xs aspect-2/3 object-cover rounded-[40px] border border-black"
+						src={imageSrc}
+						alt={imageAlt}
+						loading="lazy"
+						decoding="async"
+					/>
+				) : (
+					<div class="w-full max-w-xs aspect-2/3 rounded-[40px] border border-black bg-white"></div>
+				)}
+			</div>
+		) : null}
+	</div>
+</section>

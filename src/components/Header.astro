@@ -1,0 +1,196 @@
+---
+import logo from '../assets/logo.png';
+import OptimizedImage from './OptimizedImage.astro';
+const navLinks = [
+	{ name: 'LUZ', href: '/luz' },
+	{ name: 'GAS', href: '/gas' },
+	{ name: 'INTERNET', href: '/internet' },
+	{ name: 'EMPRESAS', href: '/empresas', active: true },
+	{ name: 'BLOG', href: '/blog' },
+];
+---
+
+<header id="header" class="bg-primary py-4 sticky px-4 mx-0 lg:mx-32 top-0 z-40 transition-all duration-700 border-2 border-transparent">
+	<input id="menu-toggle" type="checkbox" class="sr-only" />
+	<div id="header-content" class="max-w-7xl mx-auto flex items-center justify-between transition-all duration-700">
+		<!-- Logo -->
+		<a href="/" id="logo-link" class="text-xl font-bold tracking-tight z-60 shrink-0">
+            <OptimizedImage 
+				src={logo} 
+				alt="Bajatufactura" 
+				loading="eager" 
+				width={250} 
+				height={250} 
+				class="h-12 w-auto lg:h-auto lg:w-[250px]"
+			/>
+		</a>
+
+		<!-- Desktop Navigation -->
+		<nav class="hidden lg:flex flex-1 justify-center">
+			<ul class="flex items-center gap-8">
+				{navLinks.map((link) => (
+					<li>
+						<a 
+							href={link.href} 
+							class={`text-sm tracking-wide transition-colors hover:opacity-70 ${link.active ? 'font-bold' : 'font-medium'}`}
+						>
+							{link.name}
+						</a>
+					</li>
+				))}
+			</ul>
+		</nav>
+
+		<!-- Desktop CTA Button -->
+		<a 
+			href="/calcular" 
+			class="hidden lg:block bg-black text-white text-xs font-bold tracking-wider px-5 py-3 rounded-full hover:bg-gray-800 transition-colors"
+		>
+			CALCULA TU AHORRO
+		</a>
+
+		<!-- Mobile Menu Toggle (CSS-only) -->
+		<label 
+			for="menu-toggle"
+			id="menu-toggle-label"
+			class="lg:hidden flex flex-col justify-center items-center w-10 h-10 z-60 cursor-pointer"
+			aria-label="Abrir menú"
+			aria-controls="mobile-menu"
+		>
+			<span class="hamburger-line w-6 h-0.5 bg-black transition-all duration-300"></span>
+			<span class="hamburger-line w-6 h-0.5 bg-black transition-all duration-300 mt-1.5"></span>
+			<span class="hamburger-line w-6 h-0.5 bg-black transition-all duration-300 mt-1.5"></span>
+		</label>
+	</div>
+
+	<!-- Mobile Menu Backdrop (click to close) -->
+	<label for="menu-toggle" class="mobile-menu-backdrop lg:hidden" aria-hidden="true"></label>
+
+	<!-- Mobile Menu -->
+	<div 
+		id="mobile-menu"
+		class="fixed top-20 right-0 bg-white border-2 border-black z-50 rounded-2xl shadow-2xl w-72 max-w-[calc(100vw-3rem)] py-8 px-6 flex flex-col transition-all duration-300 lg:hidden"
+	>
+		<nav class="flex flex-col items-start gap-6">
+			{navLinks.map((link) => (
+				<a 
+					href={link.href} 
+					class={`text-lg tracking-wide transition-colors hover:opacity-70 ${link.active ? 'font-bold' : 'font-medium'}`}
+				>
+					{link.name}
+				</a>
+			))}
+			<a 
+				href="/calcular" 
+				class="mt-2 w-full text-center bg-black text-white text-xs font-bold tracking-wider px-6 py-3 rounded-full hover:bg-gray-800 transition-colors"
+			>
+				CALCULA TU AHORRO
+			</a>
+		</nav>
+	</div>
+</header>
+
+<style>
+	#menu-toggle:checked ~ #header-content #menu-toggle-label .hamburger-line:nth-child(1) {
+		transform: rotate(45deg) translate(4px, 4px);
+	}
+	#menu-toggle:checked ~ #header-content #menu-toggle-label .hamburger-line:nth-child(2) {
+		opacity: 0;
+	}
+	#menu-toggle:checked ~ #header-content #menu-toggle-label .hamburger-line:nth-child(3) {
+		transform: rotate(-45deg) translate(4px, -4px);
+	}
+
+	#mobile-menu {
+		transform: translateX(100%);
+		right: 0;
+	}
+
+	#menu-toggle:checked ~ #mobile-menu {
+		transform: translateX(0);
+		right: 1.5rem;
+	}
+
+	#menu-toggle:checked ~ .mobile-menu-backdrop {
+		opacity: 1;
+		pointer-events: auto;
+	}
+
+	.mobile-menu-backdrop {
+		position: fixed;
+		inset: 0;
+		background: rgba(0, 0, 0, 0.15);
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 300ms;
+		z-index: 45;
+	}
+
+	header.scrolled {
+		border-radius: 9999px;
+		border-color: black;
+		margin: 0.75;
+
+        top: 1rem;
+		box-shadow: 0 -4px 8px -2px rgba(0, 0, 0, 0.15), 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+	}
+
+	header.scrolled #header-content {
+		max-width: 90%;
+        padding: 0 2rem;
+	}
+
+	/* Asegurar que el logo sea visible en móviles */
+	#logo-link {
+		max-width: 50%;
+	}
+
+	#logo-link img,
+	#logo-link picture {
+		max-width: 100%;
+		height: auto;
+	}
+
+    @media (max-width: 768px) {
+        header.scrolled #header-content {
+            padding: 0 1rem;
+            max-width: 100%;
+        }
+		
+		header.scrolled {
+			margin: 0 1rem;
+		}
+    }
+</style>
+
+<script>
+	const header = document.getElementById('header');
+	// Scroll detection using IntersectionObserver for better performance
+	if (header) {
+		// Create and insert scroll sentinel element
+		const scrollSentinel = document.createElement('div');
+		scrollSentinel.id = 'scroll-sentinel';
+		scrollSentinel.style.cssText = 'position: absolute; top: 0; left: 0; width: 100%; height: 1px; pointer-events: none; z-index: -1;';
+		document.body.insertBefore(scrollSentinel, document.body.firstChild);
+		
+		const observer = new IntersectionObserver(
+			(entries) => {
+				const entry = entries[0];
+				// When sentinel is not intersecting (out of view), user has scrolled
+				if (!entry.isIntersecting) {
+					header.classList.add('scrolled');
+				} else {
+					header.classList.remove('scrolled');
+				}
+			},
+			{
+				// Trigger when sentinel is 50px from top of viewport
+				rootMargin: '50px 0px 0px 0px',
+				threshold: 0
+			}
+		);
+		
+		observer.observe(scrollSentinel);
+	}
+
+</script>

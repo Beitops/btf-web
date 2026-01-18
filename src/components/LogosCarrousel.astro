@@ -1,0 +1,189 @@
+---
+import EndesaLogo from '../assets/comercializadoras/Endesa.svg?url';
+import IberdrolaLogo from '../assets/comercializadoras/Iberdrola.svg?url';
+import NaturgyLogo from '../assets/comercializadoras/Naturgy.svg?url';
+import OctopusLogo from '../assets/comercializadoras/Octopus.svg?url';
+import OptimusLogo from '../assets/comercializadoras/Optimus.svg?url';
+import RepsolLogo from '../assets/comercializadoras/Repsol.svg?url';
+import WekiwiLogo from '../assets/comercializadoras/Wekiwi.svg?url';
+
+const logos = [
+	{ src: EndesaLogo, alt: 'Endesa' },
+	{ src: IberdrolaLogo, alt: 'Iberdrola' },
+	{ src: NaturgyLogo, alt: 'Naturgy' },
+	{ src: OctopusLogo, alt: 'Octopus Energy' },
+	{ src: OptimusLogo, alt: 'Optimus' },
+	{ src: RepsolLogo, alt: 'Repsol' },
+	{ src: WekiwiLogo, alt: 'Wekiwi' },
+];
+---
+
+<section class="logo-marquee md:py-10" aria-label="Comercializadoras">
+	<h2 class="logo-marquee__title js-viewport-reveal">
+		Trabajamos con todas las marcas para encontrar el
+		<span class="logo-marquee__highlight">mejor precio</span>
+	</h2>
+	<div class="logo-marquee__inner">
+		<div class="logo-marquee__track">
+			<div class="logo-marquee__group">
+				{logos.map((logo) => (
+					<img
+						class="logo-marquee__image"
+						src={logo.src}
+						alt={logo.alt}
+						loading="lazy"
+						decoding="async"
+					/>
+				))}
+			</div>
+			<div class="logo-marquee__group" aria-hidden="true">
+				{logos.map((logo) => (
+					<img
+						class="logo-marquee__image"
+						src={logo.src}
+						alt=""
+						loading="lazy"
+						decoding="async"
+					/>
+				))}
+			</div>
+		</div>
+	</div>
+</section>
+
+<script>
+	import { observeReveal } from '../utils/viewportObserver';
+
+	const revealTargets = document.querySelectorAll('.js-viewport-reveal');
+	revealTargets.forEach((target) => observeReveal(target));
+</script>
+
+<style>
+	.logo-marquee {
+		background: #ffffff;
+	}
+	
+
+	.logo-marquee__title {
+		max-width: 800px;
+		margin: 0 auto 3rem;
+		padding: 0 1.5rem;
+		text-align: center;
+		font-size: 1.75rem;
+		font-weight: 400;
+		color: #111827;
+		font-family: var(--font-family-secondary, serif);
+		opacity: 0;
+		transform: translateX(-24px);
+		transition: opacity 1300ms ease, transform 500ms ease;
+		will-change: opacity, transform;
+	}
+
+	.logo-marquee__title.is-visible {
+		opacity: 1;
+		transform: translateX(0);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.logo-marquee__title {
+			transition: none;
+			transform: none;
+			opacity: 1;
+		}
+	}
+
+	.logo-marquee__highlight {
+		position: relative;
+		display: inline-block;
+		font-style: italic;
+        font-weight: 500;
+	}
+
+
+	.logo-marquee__inner {
+		position: relative;
+		overflow: hidden;
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 0 1.5rem;
+	}
+
+	.logo-marquee__inner::before,
+	.logo-marquee__inner::after {
+		content: '';
+		position: absolute;
+		top: 0;
+		height: 100%;
+		width: 140px;
+		z-index: 2;
+		pointer-events: none;
+	}
+
+	.logo-marquee__inner::before {
+		left: 0;
+		background: linear-gradient(90deg, #ffffff 0%, rgba(255, 255, 255, 0) 100%);
+	}
+
+	.logo-marquee__inner::after {
+		right: 0;
+		background: linear-gradient(270deg, #ffffff 0%, rgba(255, 255, 255, 0) 100%);
+	}
+
+	.logo-marquee__track {
+		display: flex;
+		width: max-content;
+		animation: logo-marquee-scroll 26s linear infinite;
+	}
+
+	.logo-marquee__group {
+		display: flex;
+		align-items: center;
+		gap: 3rem;
+		padding-right: 3rem;
+	}
+
+	.logo-marquee__image {
+		height: 48px;
+		width: auto;
+		object-fit: contain;
+		filter: saturate(0.95);
+		transition: transform 200ms ease, filter 200ms ease, box-shadow 200ms ease;
+	}
+
+	.logo-marquee__image:hover {
+		transform: scale(1.06);
+		filter: saturate(1)
+			drop-shadow(0 0 6px var(--color-primary))
+			drop-shadow(0 0 16px var(--color-primary))
+			drop-shadow(0 0 28px var(--color-primary));
+	}
+
+	@keyframes logo-marquee-scroll {
+		from {
+			transform: translateX(0);
+		}
+		to {
+			transform: translateX(-50%);
+		}
+	}
+
+	@media (max-width: 640px) {
+		.logo-marquee__track {
+			animation-duration: 18s;
+		}
+
+		.logo-marquee__image {
+			height: 38px;
+		}
+
+		.logo-marquee__group {
+			gap: 2rem;
+			padding-right: 2rem;
+		}
+
+		.logo-marquee__inner::before,
+		.logo-marquee__inner::after {
+			width: 90px;
+		}
+	}
+</style>
