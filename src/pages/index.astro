@@ -1,51 +1,97 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Header from '../components/Header.astro';
-import Hero from '../components/Hero.astro';
-import LogosCarrousel from '../components/LogosCarrousel.astro';
-import SectionImage from '../components/SectionImage.astro';
-import Banner from '../components/Banner.astro';
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Hero from "../components/Hero.astro";
+import LogosCarrousel from "../components/LogosCarrousel.astro";
+import SectionImage from "../components/SectionImage.astro";
+import Banner from "../components/Banner.astro";
+import Section1 from "../assets/sections/Section1.png";
+import Section2 from "../assets/sections/Section2.png";
 ---
 
 <Layout>
-
 	<Header />
 
 	<main class="bg-body">
 		<div id="hero">
 			<Hero />
 		</div>
-		
 	</main>
 
 	<LogosCarrousel />
 
-	<SectionImage imagePosition="left">
-		<h2 class="text-3xl md:text-4xl font-bold leading-tight mb-4 text-center md:text-left">
-			Compara y baja tu factura de la luz <span class="font-normal">sin llamadas</span>
+	<SectionImage
+		imagePosition="left"
+		imageSrc={Section1.src}
+		imageAlt="Compara y baja tu factura de la luz"
+	>
+		<h2
+			class="text-3xl md:text-4xl leading-tight mb-4 text-center md:text-left"
+		>
+			Analizamos tu factura y te conseguimos la <span class="font-bold"
+				>mejor tarifa de luz</span
+			>
 		</h2>
-		<p class="text-lg text-gray-700 max-w-lg text-center md:text-left font-family-secondary font-light">
-			Arrastra tu factura y comprueba si estás pagando lo justo de forma totalmente gratuita.
+		<p
+			class="text-lg mt-6 text-gray-700 max-w-lg text-center md:text-left font-family-secondary font-light"
+		>
+			En Baja Tu Factura analizamos <span class="font-bold">tu factura de luz</span> real, no
+			estimaciones ni datos genéricos. Solo tienes que arrastrarla y
+			nuestro sistema estudia tu consumo para encontrar <span class="font-bold">la mejor oferta</span> de
+			luz adaptada a tu caso concreto, sin comparaciones genéricas ni
+			letra pequeña.
+		</p>
+
+		<p
+			class="text-lg mt-6 text-gray-700 max-w-lg text-center md:text-left font-family-secondary font-light"
+		>
+			Nuestro objetivo es sencillo, que puedas <span class="font-bold">bajar tu factura</span> desde el
+			primer momento, sin llamadas interminables ni procesos complicados.
+			Nosotros hacemos el trabajo por ti para que tú solo veas el
+			resultado.
 		</p>
 	</SectionImage>
 
 	<Banner />
 
-	<SectionImage imagePosition="right">
-		<h2 class="text-3xl md:text-4xl font-bold leading-tight mb-4 text-center md:text-left">
-			Compara y baja tu factura de la luz <span class="font-normal">sin llamadas</span>
+	<SectionImage
+		imagePosition="right"
+		imageSrc={Section2.src}
+		imageAlt="Compara y baja tu factura de la luz"
+	>
+		<h2
+			class="text-3xl md:text-4xl leading-tight mb-4 text-center md:text-left"
+		>
+			Somos tu aliado para reducir tu <span class="font-bold"
+				>factura de luz</span
+			> a largo plazo
 		</h2>
-		<p class="text-lg text-gray-700 max-w-lg text-center md:text-left font-family-secondary font-light">
-			Arrastra tu factura y comprueba si estás pagando lo justo de forma totalmente gratuita.
+		<p
+			class="text-lg mt-6 text-gray-700 max-w-lg text-center md:text-left font-family-secondary font-light"
+		>
+			Pero ahorrar una vez no es suficiente. En <span class="font-bold">Baja Tu Factura</span> trabajamos
+			contigo a largo plazo, vigilando de forma constante los precios de
+			la luz y analizando el mercado en busca de nuevas <span class="font-bold">oportunidades de
+			ahorro</span>.
+		</p>
+
+		<p
+			class="text-lg mt-6 text-gray-700 max-w-lg text-center md:text-left font-family-secondary font-light"
+		>
+			Cada vez que aparece una <span class="font-bold">oferta de luz</span> mejor para tu perfil de
+			consumo, te avisamos para que puedas cambiar y seguir pagando lo
+			mínimo posible, sin tener que preocuparte por subidas, renovaciones
+			o cambios en tu contrato. Así te aseguras de que tu <span class="font-bold">factura de luz</span>
+			esté siempre optimizada, hoy y mañana.
 		</p>
 	</SectionImage>
 
 	<footer class="bg-body">
 		<div class="max-w-7xl mx-auto">
 			<p class="text-center text-sm text-gray-500">
-				&copy; {new Date().getFullYear()} Bajatufactura. Todos los derechos reservados.
+				&copy; {new Date().getFullYear()} Bajatufactura. Todos los derechos
+				reservados.
 			</p>
 		</div>
 	</footer>
-
 </Layout>

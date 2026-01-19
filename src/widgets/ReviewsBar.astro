@@ -1,13 +1,15 @@
 ---
 import type { ImageMetadata } from "astro";
 import OptimizedImage from "../components/OptimizedImage.astro";
-import logo from "../assets/logo.png";
+import review1 from "../assets/Reviews/1.png";
+import review2 from "../assets/Reviews/2.png";
+import review3 from "../assets/Reviews/3.png";
 
 const {
   rating = "4.8",
   users = "12.5K",
   label = "Usuarios",
-  avatars = [logo, logo, logo],
+  avatars = [review1, review2, review3],
 } = Astro.props as {
   rating?: string;
   users?: string;

@@ -2,13 +2,20 @@
 import OptimizedImage from './OptimizedImage.astro';
 import FacturinBanner from '../assets/facturin/FacturinBanner1.png';
 import FacturinBannerMobile from '../assets/facturin/FacturinBanner1Mobile.png';
+import Ribbon from '../assets/decoration/Ribbon.png';
 ---
 
 <!-- Banners home page-->
 <section class="bg-white px-6 py-12">
 	<div class="max-w-6xl mx-auto">
-		<div class="bg-primary rounded-[40px] px-8 py-10 md:px-40 md:py-12 relative">
-			<div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+		<div class="bg-primary rounded-[40px] px-8 py-10 md:px-40 md:py-12 relative overflow-hidden">
+			<img
+				src={Ribbon.src}
+				alt="Decoration ribbon"
+				class="absolute bottom-0 left-[59%] lg:-bottom-30 transform -translate-x-1/2 w-auto h-auto max-w-full object-contain pointer-events-none z-0"
+				aria-hidden="true"
+			/>
+			<div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center z-10">
 				<div class="text-center flex flex-col items-center justify-center">
 					<h2 class="text-2xl md:text-3xl font-bold text-black leading-tight">
 						Pagar lo justo en tu factura de luz, nunca fue tan fácil
