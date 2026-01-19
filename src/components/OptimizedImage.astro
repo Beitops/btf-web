@@ -1,9 +1,11 @@
 ---
-import { Picture } from 'astro:assets';
+import { getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
+import * as mime from 'mrmime';
 
 interface Props {
 	src: ImageMetadata;
+	sources?: { src: ImageMetadata; media?: string }[];
 	alt: string;
 	width?: number;
 	height?: number;
@@ -14,6 +16,7 @@ interface Props {
 
 const {
 	src,
+	sources = [],
 	alt,
 	width,
 	height,
@@ -31,17 +34,67 @@ const isPngOrJpg = lowerPath.endsWith('.png') ||
 
 // Si es PNG o JPG, convertir automáticamente a AVIF y WebP con fallback al original
 // El navegador elegirá el mejor formato soportado (AVIF > WebP > Original)
-// Si no es PNG/JPG, usar el formato original sin conversión
+// Para otros formatos se usa WebP como optimizado y el fallback mantiene el original
 const formats = isPngOrJpg ? ['avif', 'webp'] : undefined;
+const outputFormats = formats ?? ['webp'];
+const specialFormatsFallback = ['gif', 'svg', 'jpg', 'jpeg'];
+const fallbackFormat = specialFormatsFallback.includes(src.format) ? src.format : 'png';
+
+const optimizedImages = await Promise.all(
+	outputFormats.map((format) => getImage({ src, width, height, format, quality })),
+);
+
+const sourceImages = await Promise.all(
+	sources.map(async (source) => ({
+		media: source.media,
+		images: await Promise.all(
+			outputFormats.map((format) =>
+				getImage({ src: source.src, width, height, format, quality }),
+			),
+		),
+	})),
+);
+
+const fallbackImage = await getImage({
+	src,
+	alt,
+	width,
+	height,
+	loading,
+	quality,
+	format: fallbackFormat,
+	class: className,
+});
+
+const sourceSrcset = (image: typeof fallbackImage) =>
+	image.srcSet.values.length > 0 ? image.srcSet.attribute : image.src;
+
+const { class: fallbackClass, ...fallbackAttributes } = fallbackImage.attributes;
 ---
 
-<Picture
-	src={src}
-	alt={alt}
-	width={width}
-	height={height}
-	class={className}
-	loading={loading}
-	formats={formats}
-	quality={quality}
-/>
+<picture>
+	{
+		sourceImages.map((source) =>
+			source.images.map((image) => (
+				<source
+					media={source.media}
+					srcset={sourceSrcset(image)}
+					type={mime.lookup(image.src) ?? undefined}
+				/>
+			)),
+		)
+	}
+	{
+		optimizedImages.map((image) => (
+			<source
+				srcset={sourceSrcset(image)}
+				type={mime.lookup(image.src) ?? undefined}
+			/>
+		))
+	}
+	<img
+		src={fallbackImage.src}
+		{...fallbackAttributes}
+		class={className ?? fallbackClass}
+	/>
+</picture>
