@@ -15,7 +15,7 @@ import FacturinBannerMobile from '../assets/facturin/FacturinBanner1Mobile.png';
 					</h2>
 					<button
 						type="button"
-						class="banner-cta mt-6 inline-flex items-center justify-center bg-black text-white px-6 py-3 rounded-full font-semibold tracking-wide transition-transform duration-200 hover:scale-[1.02]"
+						class="banner-cta mt-6 inline-flex cursor-pointer items-center justify-center bg-black text-white px-6 py-3 rounded-full font-semibold tracking-wide transition-transform duration-200 hover:scale-[1.02]"
 						data-scroll-to-hero
 					>
 						ANALIZA TU FACTURA
@@ -26,7 +26,7 @@ import FacturinBannerMobile from '../assets/facturin/FacturinBanner1Mobile.png';
 						<slot />
 					</div>
 					<OptimizedImage
-						class="absolute bottom-0 inset-x-10 mx-auto lg:rigth-auto lg:left-1/2 w-70 h-50 lg:w-90 lg:h-65"
+						class="absolute bottom-0 inset-x-10 mx-auto -right-20 lg:rigth-auto lg:left-1/2 w-auto h-50 lg:h-65"
 						src={FacturinBanner}
 						sources={[{ src: FacturinBannerMobile, media: '(max-width: 1024px)' }]}
 						alt="Facturin banner"
