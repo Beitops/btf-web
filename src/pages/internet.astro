@@ -1,0 +1,125 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Hero from "../components/Hero.astro";
+import LogosCarrousel from "../components/LogosCarrousel.astro";
+import SectionImage from "../components/SectionImage.astro";
+import Banner from "../components/Banner.astro";
+import FAQs from "../components/FAQs.astro";
+import Footer from "../components/Footer.astro";
+import Section1 from "../assets/sections/Section1.png";
+import Section2 from "../assets/sections/Section2.png";
+import FacturinBanner2 from "../assets/facturin/FacturinBanner2.png";
+
+const faqs = [
+	{
+		question: "¿Estoy pagando de más en mi factura de telefonía?",
+		answer: "En muchos casos, sí. Las tarifas de telefonía cambian con el tiempo y muchas dejan de ser competitivas sin que el usuario lo note. Al subir tu factura de telefonía podemos comprobar si tu tarifa actual es adecuada o si existe una tarifa de móvil o fibra más barata según las condiciones actuales del mercado."
+	},
+	{
+		question: "¿Cómo funciona el comparador de telefonía de BajaTuFactura?",
+		answer: "Nuestro comparador de telefonía utiliza tu factura como referencia para revisar tu tarifa actual y compararla con las opciones de telefonía disponibles. De esta forma podemos indicarte si existe una tarifa de móvil o internet más económica adaptada a tu contrato. Si no hay ahorro posible, te lo decimos directamente. Si lo hay, te mostramos la mejor alternativa disponible."
+	},
+	{
+		question: "¿Por qué tengo que subir mi factura de telefonía para comparar tarifas?",
+		answer: "Porque cada contrato de telefonía es diferente. Sin tu factura solo podríamos mostrar tarifas genéricas. Al subirla, podemos revisar tu tarifa actual y comprobar si existe una opción más barata según tu situación concreta."
+	},
+	{
+		question: "¿Puedo cambiar de tarifa de telefonía sin quedarme sin servicio?",
+		answer: "Sí. El cambio de tarifa de telefonía es un trámite administrativo. No hay cortes de línea, no se realizan instalaciones nuevas y no pierdes el servicio en ningún momento."
+	},
+	{
+		question: "¿Cambiar de compañía de telefonía tiene permanencia?",
+		answer: "Dependerá de la tarifa seleccionada. En cualquier caso, la existencia de permanencia o penalizaciones siempre se te informará previamente antes de realizar cualquier cambio, para que puedas decidir con total tranquilidad."
+	},
+	{
+		question: "¿Cuánto cuesta usar el comparador de telefonía de BajaTuFactura?",
+		answer: "Nada. El servicio es totalmente gratuito para el usuario. No cobramos por revisar tu factura ni por gestionar el cambio de tarifa de telefonía."
+	},
+	{
+		question: "¿Mis datos están protegidos al subir mi factura de telefonía?",
+		answer: "Sí. Tus datos se utilizan únicamente para revisar tu tarifa de telefonía y gestionar el cambio si lo solicitas. No vendemos información ni enviamos spam."
+	}
+];
+---
+
+<Layout>
+	<Header />
+
+	<main class="bg-body">
+		<div id="hero">
+			<Hero 
+				title='Compara y baja tu factura de<br/>telefonía <span class="font-normal italic">sin llamadas.</span>'
+				subtitle='Arrastra tu factura y comprueba si estás pagando<br/>lo justo de forma totalmente gratuita.'
+			/>
+		</div>
+	</main>
+
+	<LogosCarrousel />
+
+	<SectionImage
+		imagePosition="left"
+		imageSrc={Section1.src}
+		imageAlt="Compara y baja tu factura de telefonía"
+	>
+		<h2
+			class="text-3xl md:text-4xl leading-tight mb-4 text-center md:text-left"
+		>
+			Comprobamos si tu tarifa de telefonía encaja con tu <span class="font-bold"
+				>uso actual</span
+			>
+		</h2>
+		<p
+			class="text-lg mt-6 text-gray-700 max-w-lg text-center md:text-left font-family-secondary font-light"
+		>
+			Las tarifas de telefonía cambian constantemente, pero la mayoría de personas mantiene el mismo contrato durante años. En <span class="font-bold">Baja Tu Factura</span> utilizamos tu factura para revisar qué servicios tienes contratados y si realmente los estás aprovechando.
+		</p>
+
+		<p
+			class="text-lg mt-6 text-gray-700 max-w-lg text-center md:text-left font-family-secondary font-light"
+		>
+			A partir de ahí, comprobamos si existe una <span class="font-bold">tarifa de móvil o fibra</span> más ajustada a tu uso real, evitando packs innecesarios y costes ocultos que inflan la factura.
+		</p>
+	</SectionImage>
+
+	<Banner 
+		imageClass="absolute bottom-0 inset-x-10 mx-auto -right-20 lg:rigth-auto lg:left-1/2 w-auto h-50 lg:h-65"
+		title='Pagar lo justo en tu factura de telefonía, nunca fue tan <span style="color: #00bf63">fácil</span>'
+	/>
+
+	<SectionImage
+		imagePosition="right"
+		imageSrc={Section2.src}
+		imageAlt="Compara y baja tu factura de telefonía"
+	>
+		<h2
+			class="text-3xl md:text-4xl leading-tight mb-4 text-center md:text-left"
+		>
+			Evita volver a pagar de más en <span class="font-bold"
+				>móvil y fibra</span
+			>
+		</h2>
+		<p
+			class="text-lg mt-6 text-gray-700 max-w-lg text-center md:text-left font-family-secondary font-light"
+		>
+			Una tarifa que hoy es buena puede dejar de serlo mañana. Por eso revisamos periódicamente el mercado de móvil y fibra para comprobar si aparece una opción que mejore la tuya.
+		</p>
+
+		<p
+			class="text-lg mt-6 text-gray-700 max-w-lg text-center md:text-left font-family-secondary font-light"
+		>
+			Cuando detectamos una <span class="font-bold">mejora real</span>, te avisamos para que decidas si quieres cambiar y seguir pagando lo justo.
+		</p>
+	</SectionImage>
+
+	<Banner 
+		textPosition="right" 
+		imageSrc={FacturinBanner2} 
+		imageClass="absolute bottom-0 inset-x-10 mx-auto -left-5 lg:left-20 lg:right-[35%] w-auto h-50 lg:h-65"
+		title='Despreocúpate de tu factura y pon el ahorro en <span style="color: #00bf63">automático.</span>'
+	/>
+
+	<FAQs faqs={faqs} />
+
+	<Footer />
+</Layout>

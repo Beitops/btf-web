@@ -1,0 +1,125 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Hero from "../components/Hero.astro";
+import LogosCarrousel from "../components/LogosCarrousel.astro";
+import SectionImage from "../components/SectionImage.astro";
+import Banner from "../components/Banner.astro";
+import FAQs from "../components/FAQs.astro";
+import Footer from "../components/Footer.astro";
+import Section1 from "../assets/sections/Section1.png";
+import Section2 from "../assets/sections/Section2.png";
+import FacturinBanner2 from "../assets/facturin/FacturinBanner2.png";
+
+const faqs = [
+	{
+		question: "¿Estoy pagando de más en mi factura de gas?",
+		answer: "En muchos hogares, sí. Las tarifas de gas cambian con el tiempo y muchas dejan de ser competitivas sin que el usuario lo note. Al subir tu factura de gas podemos comprobar si tu tarifa actual es adecuada o si existe una tarifa de gas más barata según las condiciones actuales del mercado."
+	},
+	{
+		question: "¿Cómo funciona el comparador de gas de BajaTuFactura?",
+		answer: "Nuestro comparador de gas utiliza tu factura como referencia para revisar tu tarifa actual y compararla con las opciones de gas disponibles. De esta forma podemos indicarte si existe una tarifa de gas más económica adaptada a tu contrato. Si no hay ahorro posible, te lo decimos directamente. Si lo hay, te mostramos la mejor alternativa disponible."
+	},
+	{
+		question: "¿Por qué tengo que subir mi factura de gas para comparar tarifas?",
+		answer: "Porque cada contrato de gas es diferente. Sin tu factura solo podríamos mostrar tarifas de gas genéricas. Al subirla, podemos revisar tu tarifa actual y comprobar si existe una opción más barata según tu situación concreta."
+	},
+	{
+		question: "¿Puedo cambiar de tarifa de gas sin cortar el suministro?",
+		answer: "Sí. El cambio de tarifa de gas es un trámite administrativo. No hay cortes de gas, no se realizan obras y no se cambia el contador."
+	},
+	{
+		question: "¿Cambiar de compañía de gas tiene permanencia?",
+		answer: "No. Las tarifas de gas que revisamos no tienen permanencia. Puedes cambiar de tarifa o de compañía cuando lo necesites, sin penalizaciones."
+	},
+	{
+		question: "¿Cuánto cuesta usar el comparador de gas de BajaTuFactura?",
+		answer: "Nada. El servicio es totalmente gratuito para el usuario. No cobramos por revisar tu factura ni por gestionar el cambio de tarifa de gas."
+	},
+	{
+		question: "¿Mis datos están protegidos al subir mi factura de gas?",
+		answer: "Sí. Tus datos se utilizan únicamente para revisar tu tarifa de gas y gestionar el cambio si lo solicitas. No vendemos información ni enviamos spam."
+	}
+];
+---
+
+<Layout>
+	<Header />
+
+	<main class="bg-body">
+		<div id="hero">
+			<Hero 
+				title='Compara y baja tu factura de<br/>gas <span class="font-normal italic">sin llamadas.</span>'
+				subtitle='Arrastra tu factura y comprueba si estás pagando<br/>lo justo de forma totalmente gratuita.'
+			/>
+		</div>
+	</main>
+
+	<LogosCarrousel />
+
+	<SectionImage
+		imagePosition="left"
+		imageSrc={Section1.src}
+		imageAlt="Compara y baja tu factura de gas"
+	>
+		<h2
+			class="text-3xl md:text-4xl leading-tight mb-4 text-center md:text-left"
+		>
+			Comprobamos tu tarifa de gas y buscamos una <span class="font-bold"
+				>opción más económica</span
+			>
+		</h2>
+		<p
+			class="text-lg mt-6 text-gray-700 max-w-lg text-center md:text-left font-family-secondary font-light"
+		>
+			Muchos usuarios tienen tarifas de gas que ya no encajan con su situación actual. En <span class="font-bold">Baja Tu Factura</span> utilizamos tu factura de gas para descartar opciones que no te convienen y centrar el estudio solo en tarifas que realmente pueden mejorar lo que estás pagando hoy.
+		</p>
+
+		<p
+			class="text-lg mt-6 text-gray-700 max-w-lg text-center md:text-left font-family-secondary font-light"
+		>
+			El resultado es simple: sabes rápidamente si existe una <span class="font-bold">alternativa más económica</span> para ti, sin perder tiempo comparando ofertas ni hablando con comerciales.
+		</p>
+	</SectionImage>
+
+	<Banner 
+		imageClass="absolute bottom-0 inset-x-10 mx-auto -right-20 lg:rigth-auto lg:left-1/2 w-auto h-50 lg:h-65"
+		title='Pagar lo justo en tu factura de gas, nunca fue tan <span style="color: #00bf63">fácil</span>'
+	/>
+
+	<SectionImage
+		imagePosition="right"
+		imageSrc={Section2.src}
+		imageAlt="Compara y baja tu factura de gas"
+	>
+		<h2
+			class="text-3xl md:text-4xl leading-tight mb-4 text-center md:text-left"
+		>
+			Mantenemos tu <span class="font-bold"
+				>factura de gas</span
+			> bajo control
+		</h2>
+		<p
+			class="text-lg mt-6 text-gray-700 max-w-lg text-center md:text-left font-family-secondary font-light"
+		>
+			El mercado del gas cambia y las tarifas no siempre siguen siendo la mejor opción con el tiempo. Por eso, en <span class="font-bold">Baja Tu Factura</span> hacemos un seguimiento continuo de las ofertas de gas disponibles para detectar oportunidades que te permitan seguir ahorrando.
+		</p>
+
+		<p
+			class="text-lg mt-6 text-gray-700 max-w-lg text-center md:text-left font-family-secondary font-light"
+		>
+			Cuando encontramos una <span class="font-bold">tarifa de gas</span> que mejora la tuya, te avisamos para que puedas cambiar fácilmente y evitar pagar de más mes tras mes.
+		</p>
+	</SectionImage>
+
+	<Banner 
+		textPosition="right" 
+		imageSrc={FacturinBanner2} 
+		imageClass="absolute bottom-0 inset-x-10 mx-auto -left-5 lg:left-20 lg:right-[35%] w-auto h-50 lg:h-65"
+		title='Despreocúpate de tu factura y pon el ahorro en <span style="color: #00bf63">automático.</span>'
+	/>
+
+	<FAQs faqs={faqs} />
+
+	<Footer />
+</Layout>

@@ -10,6 +10,29 @@ import Footer from "../components/Footer.astro";
 import Section1 from "../assets/sections/Section1.png";
 import Section2 from "../assets/sections/Section2.png";
 import FacturinBanner2 from "../assets/facturin/FacturinBanner2.png";
+
+const faqs = [
+	{
+		question: "¿Estoy pagando de más en la luz?",
+		answer: "En la mayoría de hogares, sí. Las tarifas cambian a los 12 meses en todas las compañías, los precios suben y bajan y casi nadie revisa su factura con frecuencia. Subiendo tu factura te lo decimos en segundos, sin llamadas ni compromisos."
+	},
+	{
+		question: "¿Por qué necesito subir mi factura?",
+		answer: "Porque cada hogar consume distinto. Sin tu factura solo podríamos darte estimaciones. Con ella, el análisis es real, personalizado y exacto."
+	},
+	{
+		question: "¿Cuánto cuesta usar BajaTuFactura?",
+		answer: "Nada. El servicio es 100% gratuito para ti. Nuestro objetivo es que pagues menos, no que pagues más."
+	},
+	{
+		question: "¿Hay permanencia o penalizaciones?",
+		answer: "No. Puedes irte cuando quieras y cambiar de tarifa siempre que lo necesites."
+	},
+	{
+		question: "¿Puedo cambiar de tarifa de luz sin cortar el suministro?",
+		answer: "Sí. El cambio de tarifa de luz es un trámite administrativo. No hay cortes de luz, no se realizan obras y no se cambia el contador."
+	}
+];
 ---
 
 <Layout>
@@ -17,7 +40,10 @@ import FacturinBanner2 from "../assets/facturin/FacturinBanner2.png";
 
 	<main class="bg-body">
 		<div id="hero">
-			<Hero />
+			<Hero 
+				title='Compara y baja tu factura de<br/>luz <span class="font-normal italic">sin llamadas.</span>'
+				subtitle='Arrastra tu factura y comprueba si estás pagando<br/>lo justo de forma totalmente gratuita.'
+			/>
 		</div>
 	</main>
 
@@ -99,7 +125,7 @@ import FacturinBanner2 from "../assets/facturin/FacturinBanner2.png";
 		title='Despreocúpate de tu factura y pon el ahorro en <span style="color: #00bf63">automático.</span>'
 	/>
 
-	<FAQs />
+	<FAQs faqs={faqs} />
 
 	<Footer />
 </Layout>

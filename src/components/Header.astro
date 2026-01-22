@@ -2,7 +2,7 @@
 import logo from '../assets/logo.png';
 import OptimizedImage from './OptimizedImage.astro';
 const navLinks = [
-	{ name: 'LUZ', href: '/luz' },
+	{ name: 'LUZ', href: '/' },
 	{ name: 'GAS', href: '/gas' },
 	{ name: 'INTERNET', href: '/internet' },
 	{ name: 'EMPRESAS', href: '/empresas', active: true },
@@ -10,7 +10,7 @@ const navLinks = [
 ];
 ---
 
-<header id="header" class="bg-primary py-4 sticky px-4 mx-0 lg:mx-32 top-0 z-40 transition-all duration-700 border-2 border-transparent">
+<header id="header" transition:animate="fade" class="bg-primary py-4 sticky px-4 mx-0 lg:mx-32 top-0 z-40 transition-all duration-700 border-2 border-transparent">
 	<input id="menu-toggle" type="checkbox" class="sr-only" />
 	<div id="header-content" class="max-w-7xl mx-auto flex items-center justify-between transition-all duration-700">
 		<!-- Logo -->
