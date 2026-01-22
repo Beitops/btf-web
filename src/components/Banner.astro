@@ -1,55 +1,121 @@
 ---
-import OptimizedImage from './OptimizedImage.astro';
-import FacturinBanner from '../assets/facturin/FacturinBanner1.png';
-import FacturinBannerMobile from '../assets/facturin/FacturinBanner1Mobile.png';
-import Ribbon from '../assets/decoration/Ribbon.png';
+import type { ImageMetadata } from "astro";
+import OptimizedImage from "./OptimizedImage.astro";
+import FacturinBanner from "../assets/facturin/FacturinBanner1.png";
+import FacturinBannerMobile from "../assets/facturin/FacturinBanner1Mobile.png";
+import Ribbon from "../assets/decoration/Ribbon.png";
+
+type TextPosition = "left" | "right";
+
+interface Props {
+	textPosition?: TextPosition;
+	imageSrc?: ImageMetadata;
+	imageMobileSrc?: ImageMetadata;
+	imageClass?: string;
+	title?: string;
+}
+
+const {
+	textPosition = "left",
+	imageSrc = FacturinBanner,
+	imageMobileSrc = FacturinBannerMobile,
+	imageClass = "absolute bottom-0 inset-x-10 mx-auto -right-20 lg:rigth-auto lg:left-1/2 w-auto h-50 lg:h-65",
+	title = "Pagar lo justo en tu factura de luz, nunca fue tan fácil",
+} = Astro.props;
+
+const isTextLeft = textPosition !== "right";
 ---
 
 <!-- Banners home page-->
 <section class="bg-white px-6 py-12">
 	<div class="max-w-6xl mx-auto">
-		<div class="bg-primary rounded-[40px] px-8 py-10 md:px-40 md:py-12 relative overflow-hidden">
+		<div
+			class="bg-primary rounded-[40px] px-8 py-10 md:px-40 md:py-12 relative overflow-hidden"
+		>
 			<img
 				src={Ribbon.src}
 				alt="Decoration ribbon"
 				class="absolute bottom-0 left-[59%] lg:-bottom-30 transform -translate-x-1/2 w-auto h-auto max-w-full object-contain pointer-events-none z-0"
 				aria-hidden="true"
 			/>
-			<div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center z-10">
-				<div class="text-center flex flex-col items-center justify-center">
-					<h2 class="text-3xl md:text-4xl font-bold text-black leading-tight">
-						Pagar lo justo en tu factura de luz, nunca fue tan fácil
-					</h2>
-					<button
-						type="button"
-						class="banner-cta mt-6 inline-flex cursor-pointer items-center justify-center bg-black text-white px-6 py-3 rounded-full font-semibold tracking-wide transition-transform duration-200 hover:scale-[1.02]"
-						data-scroll-to-hero
-					>
-						ANALIZA TU FACTURA
-					</button>
-				</div>
-				<div class="flex items-end justify-center md:justify-end min-h-[160px] h-full">
-					<div class="relative z-10">
-						<slot />
-					</div>
-					<OptimizedImage
-						class="absolute bottom-0 inset-x-10 mx-auto -right-20 lg:rigth-auto lg:left-1/2 w-auto h-50 lg:h-65"
-						src={FacturinBanner}
-						sources={[{ src: FacturinBannerMobile, media: '(max-width: 1024px)' }]}
-						alt="Facturin banner"
-						loading="lazy"
-					/>
-				</div>
+			<div
+				class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center z-10"
+			>
+				{
+					isTextLeft ? (
+						<div class="text-center flex flex-col items-center justify-center">
+							<h2 
+								class="text-3xl md:text-4xl font-bold text-black leading-tight"
+								set:html={title}
+							></h2>
+
+							<button
+								type="button"
+								class="banner-cta mt-6 inline-flex cursor-pointer items-center justify-center bg-black text-white px-6 py-3 rounded-full font-semibold tracking-wide transition-transform duration-200 hover:scale-[1.02]"
+								data-scroll-to-hero
+							>
+								ANALIZA TU FACTURA
+							</button>
+						</div>
+					) : (
+						<div class="flex items-end justify-center md:justify-start min-h-[160px] h-full order-2 lg:order-1">
+							<div class="relative z-10">
+								<slot />
+							</div>
+							<OptimizedImage
+								class={imageClass}
+								src={imageSrc}
+								alt="Facturin banner"
+								loading="lazy"
+							/>
+						</div>
+					)
+				}
+				{
+					isTextLeft ? (
+						<div class="flex items-end justify-center md:justify-end min-h-[160px] h-full">
+							<div class="relative z-10">
+								<slot />
+							</div>
+							<OptimizedImage
+								class={imageClass}
+								src={imageSrc}
+								sources={[
+									{
+										src: imageMobileSrc,
+										media: "(max-width: 1024px)",
+									},
+								]}
+								alt="Facturin banner"
+								loading="lazy"
+							/>
+						</div>
+					) : (
+						<div class="text-center flex flex-col items-center justify-center order-1 lg:order-2">
+							<h2 
+								class="text-3xl md:text-4xl font-bold text-black leading-tight"
+								set:html={title}
+							></h2>
+							<button
+								type="button"
+								class="banner-cta mt-6 inline-flex cursor-pointer items-center justify-center bg-black text-white px-6 py-3 rounded-full font-semibold tracking-wide transition-transform duration-200 hover:scale-[1.02]"
+								data-scroll-to-hero
+							>
+								ANALIZA TU FACTURA
+							</button>
+						</div>
+					)
+				}
 			</div>
 		</div>
 	</div>
 </section>
 
 <script>
-	const scrollButton = document.querySelector('[data-scroll-to-hero]');
+	const scrollButton = document.querySelector("[data-scroll-to-hero]");
 
-	scrollButton?.addEventListener('click', () => {
-		const hero = document.getElementById('hero');
+	scrollButton?.addEventListener("click", () => {
+		const hero = document.getElementById("hero");
 		if (!hero) return;
 
 		const targetY = hero.getBoundingClientRect().top + window.scrollY;
@@ -80,13 +146,27 @@ import Ribbon from '../assets/decoration/Ribbon.png';
 	}
 
 	@keyframes banner-vibrate {
-		0% { transform: translate(0); }
-		5% { transform: translate(-2px, 1px); }
-		10% { transform: translate(2px, -1px); }
-		15% { transform: translate(-1px, 2px); }
-		20% { transform: translate(1px, -2px); }
-		25% { transform: translate(0); }
-		100% { transform: translate(0); }
+		0% {
+			transform: translate(0);
+		}
+		5% {
+			transform: translate(-2px, 1px);
+		}
+		10% {
+			transform: translate(2px, -1px);
+		}
+		15% {
+			transform: translate(-1px, 2px);
+		}
+		20% {
+			transform: translate(1px, -2px);
+		}
+		25% {
+			transform: translate(0);
+		}
+		100% {
+			transform: translate(0);
+		}
 	}
 
 	@media (prefers-reduced-motion: reduce) {

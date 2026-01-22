@@ -1,0 +1,126 @@
+---
+import logo from '../assets/logo.png';
+import OptimizedImage from './OptimizedImage.astro';
+
+const navLinks = [
+	{ name: 'LUZ', href: '/luz' },
+	{ name: 'GAS', href: '/gas' },
+	{ name: 'INTERNET', href: '/internet' },
+	{ name: 'EMPRESAS', href: '/empresas' },
+	{ name: 'BLOG', href: '/blog' },
+];
+
+const legalLinks = [
+	{ name: 'Política de privacidad', href: '/politica-privacidad' },
+	{ name: 'Política de cookies', href: '/politica-cookies' },
+	{ name: 'Aviso Legal', href: '/aviso-legal' },
+];
+---
+
+<footer class="bg-primary border-t-2 border-black">
+	<div class="max-w-7xl mx-auto px-6 py-12 lg:py-16">
+		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-8">
+			<!-- Logo y descripción -->
+			<div class="lg:col-span-1">
+				<a href="/" class="inline-block mb-6 hover:opacity-80 transition-opacity duration-200">
+					<OptimizedImage 
+						src={logo} 
+						alt="Bajatufactura" 
+						loading="lazy" 
+						width={1080} 
+						height={300}
+						class="h-10 w-auto lg:h-auto lg:w-[200px]"
+					/>
+				</a>
+				<p class="text-sm text-gray-700 font-family-secondary font-light leading-relaxed max-w-xs">
+					Somos el comparador de tarifas de luz, gas y telefonía que baja tu factura totalmente gratis.
+				</p>
+			</div>
+
+			<!-- Enlaces de navegación -->
+			<div>
+				<h3 class="text-sm font-bold tracking-wider mb-4 uppercase text-black">
+					Navegación
+				</h3>
+				<nav>
+					<ul class="space-y-3">
+						{navLinks.map((link) => (
+							<li>
+								<a 
+									href={link.href} 
+									class="text-sm text-gray-700 font-family-secondary font-medium hover:text-black transition-colors duration-200"
+								>
+									{link.name}
+								</a>
+							</li>
+						))}
+					</ul>
+				</nav>
+			</div>
+
+			<!-- Enlaces legales -->
+			<div>
+				<h3 class="text-sm font-bold tracking-wider mb-4 uppercase text-black">
+					Legal
+				</h3>
+				<nav>
+					<ul class="space-y-3">
+						{legalLinks.map((link) => (
+							<li>
+								<a 
+									href={link.href} 
+									class="text-sm text-gray-700 font-family-secondary font-medium hover:text-black transition-colors duration-200"
+								>
+									{link.name}
+								</a>
+							</li>
+						))}
+					</ul>
+				</nav>
+			</div>
+
+			<!-- Contacto -->
+			<div>
+				<h3 class="text-sm font-bold tracking-wider mb-4 uppercase text-black">
+					Contacto
+				</h3>
+				<div class="space-y-3">
+					<div>
+						<p class="text-sm text-gray-700 font-family-secondary font-light">
+							<strong class="font-medium">Dirección:</strong><br/>
+							C. Virgen de Luján, 20<br/>
+							41011 Sevilla
+						</p>
+					</div>
+					<div>
+						<p class="text-sm text-gray-700 font-family-secondary font-light">
+							<strong class="font-medium">Teléfono:</strong><br/>
+							<a href="tel:+34602449976" class="hover:text-black transition-colors duration-200">
+								+34 602 44 99 76
+							</a>
+						</p>
+					</div>
+					<div>
+						<p class="text-sm text-gray-700 font-family-secondary font-light">
+							<strong class="font-medium">Email:</strong><br/>
+							<a href="mailto:estudio@bajatufactura.es" class="hover:text-black transition-colors duration-200">
+								estudio@bajatufactura.es
+							</a>
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Línea divisoria y copyright -->
+		<div class="mt-12 pt-8 border-t border-black-200">
+			<div class="flex flex-col md:flex-row justify-between items-center gap-4">
+				<p class="text-xs text-gray-600 font-family-secondary font-light text-center md:text-left">
+					&copy; {new Date().getFullYear()} BajaTuFactura. Todos los derechos reservados.
+				</p>
+
+				</div>
+			</div>
+		</div>
+	</div>
+</footer>

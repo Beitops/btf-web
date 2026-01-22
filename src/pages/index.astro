@@ -5,8 +5,11 @@ import Hero from "../components/Hero.astro";
 import LogosCarrousel from "../components/LogosCarrousel.astro";
 import SectionImage from "../components/SectionImage.astro";
 import Banner from "../components/Banner.astro";
+import FAQs from "../components/FAQs.astro";
+import Footer from "../components/Footer.astro";
 import Section1 from "../assets/sections/Section1.png";
 import Section2 from "../assets/sections/Section2.png";
+import FacturinBanner2 from "../assets/facturin/FacturinBanner2.png";
 ---
 
 <Layout>
@@ -52,7 +55,10 @@ import Section2 from "../assets/sections/Section2.png";
 		</p>
 	</SectionImage>
 
-	<Banner />
+	<Banner 
+		imageClass="absolute bottom-0 inset-x-10 mx-auto -right-20 lg:rigth-auto lg:left-1/2 w-auto h-50 lg:h-65"
+		title='Pagar lo justo en tu factura de luz, nunca fue tan <span style="color: #00bf63">fácil</span>'
+	/>
 
 	<SectionImage
 		imagePosition="right"
@@ -86,12 +92,14 @@ import Section2 from "../assets/sections/Section2.png";
 		</p>
 	</SectionImage>
 
-	<footer class="bg-body">
-		<div class="max-w-7xl mx-auto">
-			<p class="text-center text-sm text-gray-500">
-				&copy; {new Date().getFullYear()} Bajatufactura. Todos los derechos
-				reservados.
-			</p>
-		</div>
-	</footer>
+	<Banner 
+		textPosition="right" 
+		imageSrc={FacturinBanner2} 
+		imageClass="absolute bottom-0 inset-x-10 mx-auto -left-5 lg:left-20 lg:right-[35%] w-auto h-50 lg:h-65"
+		title='Despreocúpate de tu factura y pon el ahorro en <span style="color: #00bf63">automático.</span>'
+	/>
+
+	<FAQs />
+
+	<Footer />
 </Layout>

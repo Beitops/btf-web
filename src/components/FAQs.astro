@@ -1,0 +1,169 @@
+---
+const faqs = [
+	{
+		question: "¿Estoy pagando de más en la luz?",
+		answer: "En la mayoría de hogares, sí. Las tarifas cambian a los 12 meses en todas las compañías, los precios suben y bajan y casi nadie revisa su factura con frecuencia. Subiendo tu factura te lo decimos en segundos, sin llamadas ni compromisos."
+	},
+	{
+		question: "¿Cómo funciona el análisis de mi factura?",
+		answer: "Subes tu factura, nuestro sistema analiza tu consumo, potencia y precios reales, y te dice si existe una tarifa mejor para ti. Si no hay ahorro, te lo decimos claro. Si lo hay, te mostramos la mejor opción."
+	},
+	{
+		question: "¿Por qué necesito subir mi factura?",
+		answer: "Porque cada hogar consume distinto. Sin tu factura solo podríamos darte estimaciones. Con ella, el análisis es real, personalizado y exacto."
+	},
+	{
+		question: "¿Mis datos están protegidos?",
+		answer: "Usamos tu información únicamente para analizar tu factura y gestionar el cambio. No vendemos datos ni hacemos spam. Puedes consultar nuestro perfil de Google para ver nuestro buen trabajo durante los últimos años."
+	},
+	{
+		question: "¿Qué gano subiendo mi factura ahora?",
+		answer: "Saber si estás tirando dinero cada mes. Si puedes ahorrar, lo ves al instante. Si no, te quedas tranquilo. En ambos casos, sales ganando."
+	},
+	{
+		question: "¿Cuánto cuesta usar BajaTuFactura?",
+		answer: "Nada. El servicio es 100% gratuito para ti. Nuestro objetivo es que pagues menos, no que pagues más."
+	},
+	{
+		question: "¿Hay permanencia o penalizaciones?",
+		answer: "No. Puedes irte cuando quieras y cambiar de tarifa siempre que lo necesites."
+	},
+    {
+        question: "¿Puedo cambiar de tarifa de luz sin cortar el suministro?",
+        answer: "Sí.El cambio de tarifa de luz es un trámite administrativo. No hay cortes de luz, no se realizan obras y no se cambia el contador."
+    }
+];
+---
+
+<section class="bg-white py-12 px-6">
+	<div class="max-w-4xl mx-auto">
+		<h2 class="text-2xl md:text-3xl font-bold text-center mb-10 font-primary">
+			Preguntas Frecuentes
+		</h2>
+		
+		<div class="faqs-container">
+			{faqs.map((faq, index) => (
+				<div class="faq-item">
+					<input 
+						type="checkbox" 
+						id={`faq-${index}`} 
+						class="faq-checkbox"
+					/>
+					<label 
+						for={`faq-${index}`} 
+						class="faq-question"
+					>
+						<span>{faq.question}</span>
+						<span class="faq-icon">+</span>
+					</label>
+					<div class="faq-answer">
+						<p>{faq.answer}</p>
+					</div>
+				</div>
+			))}
+		</div>
+	</div>
+</section>
+
+<style>
+	.faqs-container {
+		display: flex;
+		flex-direction: column;
+		gap: 0.875rem;
+	}
+
+	.faq-item {
+		border: 1px solid #e5e7eb;
+		border-radius: 18px;
+		overflow: hidden;
+		background: white;
+		transition: all 0.3s ease;
+	}
+
+	.faq-item:hover {
+		border-color: #d1d5db;
+		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+	}
+
+	.faq-checkbox {
+		display: none;
+	}
+
+	.faq-question {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 1rem 1.25rem;
+		cursor: pointer;
+		font-weight: 600;
+		font-size: 1rem;
+		color: #000;
+		font-family: var(--font-primary, 'Poppins', sans-serif);
+		transition: background-color 0.2s ease;
+		user-select: none;
+	}
+
+	.faq-question:hover {
+		background-color: #f9fafb;
+	}
+
+	.faq-icon {
+		font-size: 1.375rem;
+		font-weight: 300;
+		color: #000;
+		transition: transform 0.6s ease-in-out;
+		flex-shrink: 0;
+		margin-left: 1rem;
+		line-height: 1;
+	}
+
+	.faq-answer {
+		max-height: 0;
+		overflow: hidden;
+		transition: max-height 0.6s ease-in-out, padding 0.6s ease-in-out;
+		padding: 0 1.25rem;
+	}
+
+	.faq-answer p {
+		color: #374151;
+		font-size: 0.9375rem;
+		line-height: 1.6;
+		font-family: var(--font-family-secondary, 'Montserrat', sans-serif);
+		font-weight: 300;
+		margin: 0;
+		padding-bottom: 1rem;
+	}
+
+	.faq-checkbox:checked + .faq-question {
+		background-color: #fefce8;
+	}
+
+	.faq-checkbox:checked + .faq-question .faq-icon {
+		transform: rotate(45deg);
+	}
+
+	.faq-checkbox:checked ~ .faq-answer {
+		max-height: 500px;
+		padding-top: 0;
+	}
+
+	@media (max-width: 640px) {
+		.faq-question {
+			padding: 0.875rem 1rem;
+			font-size: 0.9375rem;
+		}
+
+		.faq-answer {
+			padding: 0 1rem;
+		}
+
+		.faq-answer p {
+			font-size: 0.875rem;
+			padding-bottom: 0.875rem;
+		}
+
+		.faq-icon {
+			font-size: 1.125rem;
+		}
+	}
+</style>
