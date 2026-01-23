@@ -1,6 +1,4 @@
-# Comparador de telefonía
-
-## Revisa tu factura de telefonía y deja de pagar por lo que no usas
+# Revisa tu factura de telefonía y deja de pagar por lo que no usas
 
 Sube tu factura de móvil o internet y comprueba gratis si tu tarifa sigue teniendo sentido hoy.
 

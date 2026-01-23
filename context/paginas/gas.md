@@ -1,6 +1,4 @@
-# Comparador de gas
-
-## Descubre si tu factura de gas puede ser más barata sin llamadas
+# Descubre si tu factura de gas puede ser más barata sin llamadas
 
 Sube tu factura de gas y revisa si estás pagando lo justo, de forma totalmente gratuita.
 
