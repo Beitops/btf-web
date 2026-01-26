@@ -1,0 +1,264 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+
+// TypeScript interfaces for WordPress GraphQL data - exported for use in other files
+export interface MediaDetails {
+  width: number | null;
+  height: number | null;
+}
+
+export interface FeaturedImageNode {
+  sourceUrl: string;
+  altText: string | null;
+  mediaDetails: MediaDetails | null;
+}
+
+export interface FeaturedImage {
+  node: FeaturedImageNode | null;
+}
+
+export interface IndexPost {
+  id: string;
+  title: string;
+  slug: string;
+  uri: string;
+  date: string;
+  excerpt: string | null;
+  featuredImage: FeaturedImage | null;
+}
+
+export interface WordPressPost {
+  id: string;
+  title: string;
+  slug: string;
+  uri: string;
+  date: string;
+  excerpt: string | null;
+  content: string | null;
+  featuredImage: FeaturedImage | null;
+}
+
+export interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  uri: string;
+  date: string;
+  excerpt: string | null;
+  content: string | null;
+  featuredImage: {
+    sourceUrl: string;
+    altText: string;
+    width: number | null;
+    height: number | null;
+  } | null;
+}
+
+export interface GraphQLResponse<T = WordPressPost> {
+  data?: {
+    posts?: {
+      nodes: T[];
+    };
+  };
+  errors?: Array<{ message: string }>;
+}
+
+// Enable SSR for this page so query params work at runtime
+export const prerender = false;
+
+const WP_URL = import.meta.env.WP_URL as string | undefined;
+
+// Get current page from query params (default to 1)
+const pageParam = Astro.url.searchParams.get("page");
+const page = pageParam ? Number(pageParam) : 1;
+const postsPerPage = 10;
+
+let posts: IndexPost[] = [];
+let hasNextPage = false;
+let hasPreviousPage = false;
+let totalPages = 1;
+
+if (!WP_URL) {
+  console.error("WP_URL is not defined in environment variables");
+} else {
+  try {
+    // Fetch all posts first to calculate pagination
+    const allPostsResponse = await fetch(WP_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: `
+          query GetAllPosts {
+            posts(first: 100) {
+              nodes {
+                id
+                title
+                slug
+                uri
+                date
+                excerpt
+                featuredImage {
+                  node {
+                    sourceUrl
+                    altText
+                    mediaDetails {
+                      width
+                      height
+                    }
+                  }
+                }
+              }
+            }
+          }
+        `,
+      }),
+    });
+
+    const allPostsData = (await allPostsResponse.json()) as GraphQLResponse<IndexPost>;
+    
+    if (allPostsData.data?.posts?.nodes) {
+      const allPosts = allPostsData.data.posts.nodes;
+      totalPages = Math.ceil(allPosts.length / postsPerPage);
+      
+      // Get posts for current page
+      const startIndex = (page - 1) * postsPerPage;
+      const endIndex = startIndex + postsPerPage;
+      posts = allPosts.slice(startIndex, endIndex);
+      
+      hasNextPage = page < totalPages;
+      hasPreviousPage = page > 1;
+    }
+  } catch (error: unknown) {
+    console.error("Error fetching posts:", error);
+    posts = [];
+  }
+}
+
+---
+
+<Layout>
+  <Header />
+
+  <main class="bg-body">
+    <div class="container mx-auto px-4 py-12 md:py-16">
+      <h1 class="text-4xl md:text-5xl font-bold mb-12 text-center font-family-primary">
+        Blog
+      </h1>
+
+      {posts.length > 0 ? (
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+          {posts.map((post) => (
+            <article class="bg-white rounded-[20px] border border-black overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col group">
+              <a href={`/blog/${post.slug}`} class="block">
+                {post.featuredImage?.node ? (
+                  <div class="relative overflow-hidden">
+                    <img
+                      src={post.featuredImage.node.sourceUrl}
+                      alt={post.featuredImage.node.altText ?? post.title}
+                      width={post.featuredImage.node.mediaDetails?.width ?? undefined}
+                      height={post.featuredImage.node.mediaDetails?.height ?? undefined}
+                      class="w-full aspect-video object-cover group-hover:scale-105 transition-transform duration-300"
+                      loading="lazy"
+                    />
+                  </div>
+                ) : (
+                  <div class="w-full aspect-video bg-gray-100 flex items-center justify-center">
+                    <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                )}
+              </a>
+              
+              <div class="p-5 flex flex-col grow">
+                <div class="text-xs text-gray-500 mb-3 font-family-secondary">
+                  {new Date(post.date).toLocaleDateString("es-ES", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </div>
+                
+                <h2 class="text-lg font-semibold mb-3 font-family-primary line-clamp-2 group-hover:text-[#00bf63] transition-colors">
+                  <a href={`/blog/${post.slug}`} class="hover:underline">
+                    {post.title}
+                  </a>
+                </h2>
+                
+                {post.excerpt && (
+                  <div 
+                    class="text-sm text-gray-600 mb-4 grow font-family-secondary line-clamp-3" 
+                    set:html={post.excerpt ?? ""} 
+                  />
+                )}
+                
+                <a
+                  href={`/blog/${post.slug}`}
+                  class="text-sm font-medium text-[#00bf63] hover:text-[#00a050] transition-colors inline-flex items-center gap-1 mt-auto font-family-primary"
+                >
+                  Leer más
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </a>
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-16">
+          <p class="text-lg text-gray-600 font-family-secondary">No hay entradas disponibles.</p>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div class="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
+          {hasPreviousPage && (
+            <a
+              href={page === 2 ? "/blog" : `/blog?page=${page - 1}`}
+              class="px-6 py-3 border border-black rounded-[20px] hover:bg-primary transition-colors font-medium font-family-primary"
+            >
+              ← Anterior
+            </a>
+          )}
+          
+          <span class="px-6 py-3 text-gray-700 font-family-secondary">
+            Página {page} de {totalPages}
+          </span>
+          
+          {hasNextPage && (
+            <a
+              href={`/blog?page=${page + 1}`}
+              class="px-6 py-3 border border-black rounded-[20px] hover:bg-primary transition-colors font-medium font-family-primary"
+            >
+              Siguiente →
+            </a>
+          )}
+        </div>
+      )}
+    </div>
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

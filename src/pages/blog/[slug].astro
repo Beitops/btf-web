@@ -1,0 +1,378 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+import type { WordPressPost, BlogPost, GraphQLResponse } from "./index.astro";
+import * as cheerio from "cheerio";
+
+// getStaticPaths: Generate all blog post routes at build time
+export async function getStaticPaths() {
+  const WP_URL = import.meta.env.WP_URL as string | undefined;
+  
+  if (!WP_URL) {
+    console.error("WP_URL is not defined in environment variables");
+    return [];
+  }
+  
+  try {
+    const response = await fetch(WP_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: `
+          query GetFirstPosts($first: Int!) {
+            posts(first: $first) {
+              nodes {
+                id
+                title
+                slug
+                uri
+                date
+                excerpt
+                content
+                featuredImage {
+                  node {
+                    sourceUrl
+                    altText
+                    mediaDetails {
+                      width
+                      height
+                    }
+                  }
+                }
+              }
+            }
+          }
+        `,
+        variables: {
+          first: 100, // Get enough posts to match what's shown in index
+        },
+      }),
+    });
+
+    const data = (await response.json()) as GraphQLResponse<WordPressPost>;
+    
+    if (data.errors) {
+      console.error("GraphQL errors in getStaticPaths:", data.errors);
+      return [];
+    }
+
+    if (data.data?.posts?.nodes) {
+      const paths = data.data.posts.nodes
+        .filter((post: WordPressPost): post is WordPressPost => {
+          return Boolean(post.slug && post.slug.trim() !== "");
+        })
+        .map((post: WordPressPost) => {
+          const blogPost: BlogPost = {
+            id: post.id,
+            title: post.title,
+            slug: post.slug,
+            uri: post.uri,
+            date: post.date,
+            excerpt: post.excerpt ?? null,
+            content: post.content ?? null,
+            featuredImage: post.featuredImage?.node ? {
+              sourceUrl: post.featuredImage.node.sourceUrl,
+              altText: post.featuredImage.node.altText ?? post.title,
+              width: post.featuredImage.node.mediaDetails?.width ?? null,
+              height: post.featuredImage.node.mediaDetails?.height ?? null,
+            } : null,
+          };
+
+          return {
+            params: { slug: post.slug },
+            props: {
+              post: blogPost,
+            },
+          };
+        });
+      
+      return paths;
+    }
+    
+    return [];
+  } catch (error: unknown) {
+    console.error("Error in getStaticPaths:", error);
+    return [];
+  }
+}
+
+interface Props {
+  post: BlogPost;
+}
+
+const { slug } = Astro.params;
+if (!slug || typeof slug !== "string") {
+  return Astro.redirect("/404");
+}
+
+const { post } = Astro.props as Props;
+
+// If post not found, return 404
+if (!post) {
+  console.error(`Post not found for slug: ${slug}`);
+  return Astro.redirect("/404");
+}
+
+// Process HTML content with cheerio to add modern classes
+function processContent(html: string | null): string {
+  if (!html) return "";
+  
+  const $ = cheerio.load(html, null, false);
+  
+  // Remove inline styles and existing classes from elements we want to style
+  // This ensures our CSS classes take precedence
+  $("h2, h3, h4, p, ul, ol, li").removeAttr("style").removeAttr("class");
+  
+  // Process headings
+  $("h2").addClass("blog-heading-2");
+  $("h3").addClass("blog-heading-3");
+  $("h4").addClass("blog-heading-4");
+  
+  // Process paragraphs
+  $("p").addClass("blog-paragraph");
+  
+  // Process lists
+  $("ul").addClass("blog-list");
+  $("ol").addClass("blog-list-ordered");
+  $("li").addClass("blog-list-item");
+  
+  // Return the processed HTML content
+  return $.html();
+}
+
+const processedContent = processContent(post.content);
+
+---
+
+<Layout>
+  <Header />
+
+  <main class="bg-body">
+    <div class="container mx-auto px-4 py-12 md:py-16 max-w-4xl">
+      <article class="blog-article">
+        <!-- Header Section -->
+        <header class="mb-8 md:mb-12">
+          <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6 leading-tight text-gray-900">
+            {post.title}
+          </h1>
+          
+          <div class="flex items-center gap-4 text-sm md:text-base text-gray-600 font-family-secondary">
+            <time datetime={post.date}>
+              {new Date(post.date).toLocaleDateString("es-ES", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </time>
+          </div>
+        </header>
+
+        <!-- Featured Image -->
+        {post.featuredImage && (
+          <div class="mb-8 md:mb-12 rounded-xl overflow-hidden shadow-lg">
+            <img
+              src={post.featuredImage.sourceUrl}
+              alt={post.featuredImage.altText}
+              width={post.featuredImage.width ?? undefined}
+              height={post.featuredImage.height ?? undefined}
+              class="w-full h-auto object-cover"
+              loading="eager"
+            />
+          </div>
+        )}
+
+        <!-- Content -->
+        {processedContent && (
+          <div class="blog-content" set:html={processedContent} />
+        )}
+      </article>
+
+      <!-- Back to Blog -->
+      <div class="mt-12 md:mt-16 pt-8 border-t border-gray-200">
+        <a
+          href="/blog"
+          class="inline-flex items-center gap-2 text-gray-700 hover:text-gray-900 font-medium font-family-secondary transition-colors group"
+        >
+          <span class="group-hover:-translate-x-1 transition-transform">←</span>
+          <span>Volver al blog</span>
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  .blog-article {
+    color: #1f2937;
+  }
+
+  /* Headings - using :global() to apply to dynamically inserted HTML */
+  :global(.blog-content .blog-heading-2),
+  :global(.blog-content h2.blog-heading-2) {
+    font-size: 1.875rem;
+    line-height: 1.3;
+    font-weight: 700;
+    margin-top: 2.5rem;
+    margin-bottom: 1.25rem;
+    color: #111827;
+    font-family: var(--font-primary);
+  }
+
+  :global(.blog-content .blog-heading-3),
+  :global(.blog-content h3.blog-heading-3) {
+    font-size: 1.5rem;
+    line-height: 1.4;
+    font-weight: 600;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    color: #111827;
+    font-family: var(--font-primary);
+  }
+
+  :global(.blog-content .blog-heading-4),
+  :global(.blog-content h4.blog-heading-4) {
+    font-size: 1.25rem;
+    line-height: 1.5;
+    font-weight: 600;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: #111827;
+    font-family: var(--font-primary);
+  }
+
+  /* Paragraphs */
+  :global(.blog-content .blog-paragraph),
+  :global(.blog-content p.blog-paragraph) {
+    font-size: 1.125rem;
+    line-height: 1.75;
+    margin-bottom: 1.5rem;
+    color: #374151;
+    font-family: var(--font-family-secondary);
+    font-weight: 300;
+  }
+
+  /* Lists */
+  :global(.blog-content .blog-list),
+  :global(.blog-content ul.blog-list) {
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+    padding-left: 0;
+    list-style: none;
+  }
+
+  :global(.blog-content .blog-list-ordered),
+  :global(.blog-content ol.blog-list-ordered) {
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+    list-style: decimal;
+    padding-left: 1.5rem;
+  }
+
+  :global(.blog-content .blog-list-item),
+  :global(.blog-content li.blog-list-item) {
+    font-size: 1.125rem;
+    line-height: 1.75;
+    margin-bottom: 0.75rem;
+    color: #374151;
+    font-family: var(--font-family-secondary);
+    font-weight: 300;
+    padding-left: 1.5rem;
+    position: relative;
+  }
+
+  :global(.blog-content .blog-list .blog-list-item::before),
+  :global(.blog-content ul.blog-list li.blog-list-item::before) {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #00bf63;
+    font-weight: bold;
+    font-size: 1.5rem;
+    line-height: 1.5;
+  }
+
+  /* First paragraph after headings */
+  :global(.blog-content .blog-heading-2 + .blog-paragraph),
+  :global(.blog-content .blog-heading-3 + .blog-paragraph),
+  :global(.blog-content .blog-heading-4 + .blog-paragraph) {
+    margin-top: 0.5rem;
+  }
+
+  /* Images in content */
+  :global(.blog-content img) {
+    width: 100%;
+    height: auto;
+    border-radius: 0.75rem;
+    margin: 2rem 0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Links in content */
+  :global(.blog-content a) {
+    color: #00bf63;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color 0.2s;
+  }
+
+  :global(.blog-content a:hover) {
+    color: #00a050;
+  }
+
+  /* Blockquotes */
+  :global(.blog-content blockquote) {
+    border-left: 4px solid #00bf63;
+    padding-left: 1.5rem;
+    margin: 2rem 0;
+    font-style: italic;
+    color: #4b5563;
+  }
+
+  /* Code blocks */
+  :global(.blog-content pre) {
+    background-color: #f3f4f6;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+  }
+
+  :global(.blog-content code) {
+    background-color: #f3f4f6;
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+    font-size: 0.875em;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    :global(.blog-content .blog-heading-2),
+    :global(.blog-content h2.blog-heading-2) {
+      font-size: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    :global(.blog-content .blog-heading-3),
+    :global(.blog-content h3.blog-heading-3) {
+      font-size: 1.25rem;
+      margin-top: 1.5rem;
+    }
+
+    :global(.blog-content .blog-heading-4),
+    :global(.blog-content h4.blog-heading-4) {
+      font-size: 1.125rem;
+    }
+
+    :global(.blog-content .blog-paragraph),
+    :global(.blog-content p.blog-paragraph),
+    :global(.blog-content .blog-list-item),
+    :global(.blog-content li.blog-list-item) {
+      font-size: 1rem;
+    }
+  }
+</style>

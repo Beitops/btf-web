@@ -6,11 +6,14 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "dev:debug": "node --inspect ./node_modules/astro/astro.js dev"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
     "astro": "^5.16.9",
+    "cheerio": "^1.2.0",
+    "sanitize-html": "^2.17.0",
     "tailwindcss": "^4.1.18"
   }
 }
