@@ -2,79 +2,20 @@
 import Layout from "../../layouts/Layout.astro";
 import Header from "../../components/Header.astro";
 import Footer from "../../components/Footer.astro";
+import type { IndexPost, GraphQLResponse } from "./index.astro";
 
-// TypeScript interfaces for WordPress GraphQL data - exported for use in other files
-export interface MediaDetails {
-  width: number | null;
-  height: number | null;
-}
 
-export interface FeaturedImageNode {
-  sourceUrl: string;
-  altText: string | null;
-  mediaDetails: MediaDetails | null;
-}
 
-export interface FeaturedImage {
-  node: FeaturedImageNode | null;
-}
 
-export interface IndexPost {
-  id: string;
-  title: string;
-  slug: string;
-  uri: string;
-  date: string;
-  excerpt: string | null;
-  featuredImage: FeaturedImage | null;
-}
+// Generate all pagination pages (2, 3, 4, etc.) at build time
+export async function getStaticPaths() {
+  const WP_URL = import.meta.env.WP_URL as string | undefined;
+  const postsPerPage = 10;
+  if (!WP_URL) {
+    console.error("WP_URL is not defined in environment variables");
+    return [];
+  }
 
-export interface WordPressPost {
-  id: string;
-  title: string;
-  slug: string;
-  uri: string;
-  date: string;
-  excerpt: string | null;
-  content: string | null;
-  featuredImage: FeaturedImage | null;
-}
-
-export interface BlogPost {
-  id: string;
-  title: string;
-  slug: string;
-  uri: string;
-  date: string;
-  excerpt: string | null;
-  content: string | null;
-  featuredImage: {
-    sourceUrl: string;
-    altText: string;
-    width: number | null;
-    height: number | null;
-  } | null;
-}
-
-export interface GraphQLResponse<T = WordPressPost> {
-  data?: {
-    posts?: {
-      nodes: T[];
-    };
-  };
-  errors?: Array<{ message: string }>;
-}
-
-const WP_URL = import.meta.env.WP_URL as string | undefined;
-const postsPerPage = 10;
-
-// Fetch all posts at build time for the first page
-let posts: IndexPost[] = [];
-let totalPages = 1;
-
-if (!WP_URL) {
-  console.error("WP_URL is not defined in environment variables");
-} else {
   try {
     // Fetch all posts to calculate pagination
     const allPostsResponse = await fetch(WP_URL, {
@@ -112,22 +53,54 @@ if (!WP_URL) {
 
     const allPostsData = (await allPostsResponse.json()) as GraphQLResponse<IndexPost>;
     
-    if (allPostsData.data?.posts?.nodes) {
-      const allPosts = allPostsData.data.posts.nodes;
-      totalPages = Math.ceil(allPosts.length / postsPerPage);
-      
-      // Get posts for first page
-      posts = allPosts.slice(0, postsPerPage);
+    if (!allPostsData.data?.posts?.nodes) {
+      return [];
     }
+
+    const allPosts = allPostsData.data.posts.nodes;
+    const totalPages = Math.ceil(allPosts.length / postsPerPage);
+    
+    // Generate paths for pages 2, 3, 4, etc.
+    const paths = [];
+    
+    for (let page = 2; page <= totalPages; page++) {
+      const startIndex = (page - 1) * postsPerPage;
+      const endIndex = startIndex + postsPerPage;
+      const pagePosts = allPosts.slice(startIndex, endIndex);
+      
+      paths.push({
+        params: { page: page.toString() },
+        props: {
+          posts: pagePosts,
+          page,
+          totalPages,
+        },
+      });
+    }
+    
+    return paths;
   } catch (error: unknown) {
-    console.error("Error fetching posts:", error);
-    posts = [];
+    console.error("Error fetching posts in getStaticPaths:", error);
+    return [];
   }
 }
 
-const page = 1;
+interface Props {
+  posts: IndexPost[];
+  page: number;
+  totalPages: number;
+}
+
+const { page: pageParam } = Astro.params;
+const page = pageParam ? Number(pageParam) : 1;
+
+if (isNaN(page) || page < 2) {
+  return Astro.redirect("/blog");
+}
+
+const { posts, totalPages } = Astro.props as Props;
 const hasNextPage = page < totalPages;
-const hasPreviousPage = false;
+const hasPreviousPage = page > 1;
 
 ---
 
@@ -211,7 +184,7 @@ const hasPreviousPage = false;
         <div class="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
           {hasPreviousPage && (
             <a
-              href="/blog"
+              href={page === 2 ? "/blog" : `/blog/${page - 1}`}
               class="px-6 py-3 border border-black rounded-[20px] hover:bg-primary transition-colors font-medium font-family-primary"
             >
               ← Anterior
