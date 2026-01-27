@@ -24,7 +24,6 @@ const getObserver = () => {
  * Limpia el observer compartido y resetea el estado de los elementos.
  */
 const cleanupObserver = () => {
-	console.log('[viewportObserver] cleanupObserver called');
 	if (sharedObserver) {
 		sharedObserver.disconnect();
 		sharedObserver = null;
@@ -48,7 +47,6 @@ const initRevealElements = () => {
 
 // Configurar listeners para View Transitions de Astro
 if (typeof document !== 'undefined') {
-	console.log('[viewportObserver] Setting up Astro event listeners');
 	
 	// Limpiar antes de cambiar de página
 	document.addEventListener('astro:before-swap', cleanupObserver);

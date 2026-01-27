@@ -1,13 +1,31 @@
 ---
 import logo from '../assets/logo.png';
 import OptimizedImage from './OptimizedImage.astro';
+
 const navLinks = [
 	{ name: 'LUZ', href: '/' },
 	{ name: 'GAS', href: '/gas' },
 	{ name: 'INTERNET', href: '/internet' },
-	{ name: 'EMPRESAS', href: '/empresas', active: true },
 	{ name: 'BLOG', href: '/blog' },
 ];
+
+// Obtener la ruta actual y normalizarla (eliminar trailing slash excepto para root)
+const currentPath = Astro.url.pathname;
+
+// Función para determinar si un enlace está activo
+function isActive(href: string): boolean {
+	// Normalizar ambas rutas eliminando trailing slash (excepto root)
+	const normalizedCurrent = currentPath === '/' ? '/' : currentPath.replace(/\/$/, '');
+	const normalizedHref = href === '/' ? '/' : href.replace(/\/$/, '');
+	
+	// Para la página de inicio, solo coincidir exactamente
+	if (normalizedHref === '/') {
+		return normalizedCurrent === '/';
+	}
+	
+	// Para otras páginas, coincidir si empieza con el href (para subrutas como /blog/post)
+	return normalizedCurrent === normalizedHref || normalizedCurrent.startsWith(normalizedHref + '/');
+}
 ---
 
 <header id="header" transition:animate="fade" class="bg-primary py-4 sticky px-4 mx-0 lg:mx-32 top-0 z-40 transition-all duration-700 border-2 border-transparent">
@@ -32,7 +50,8 @@ const navLinks = [
 					<li>
 						<a 
 							href={link.href} 
-							class={`text-sm tracking-wide transition-colors hover:opacity-70 ${link.active ? 'font-bold' : 'font-medium'}`}
+							class={`text-sm tracking-wide transition-colors hover:opacity-70 ${isActive(link.href) ? 'font-bold' : 'font-medium'}`}
+							aria-current={isActive(link.href) ? 'page' : undefined}
 						>
 							{link.name}
 						</a>
@@ -75,7 +94,8 @@ const navLinks = [
 			{navLinks.map((link) => (
 				<a 
 					href={link.href} 
-					class={`text-lg tracking-wide transition-colors hover:opacity-70 ${link.active ? 'font-bold' : 'font-medium'}`}
+					class={`text-lg tracking-wide transition-colors hover:opacity-70 ${isActive(link.href) ? 'font-bold' : 'font-medium'}`}
+					aria-current={isActive(link.href) ? 'page' : undefined}
 				>
 					{link.name}
 				</a>
