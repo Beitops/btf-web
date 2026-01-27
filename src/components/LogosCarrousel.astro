@@ -52,10 +52,9 @@ const logos = [
 </section>
 
 <script>
-	import { observeReveal } from '../utils/viewportObserver';
-
-	const revealTargets = document.querySelectorAll('.js-viewport-reveal');
-	revealTargets.forEach((target) => observeReveal(target));
+	// Importar para registrar los listeners de View Transitions
+	// La inicialización de elementos .js-viewport-reveal es automática
+	import '../utils/viewportObserver';
 </script>
 
 <style>
