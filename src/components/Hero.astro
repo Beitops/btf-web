@@ -1,5 +1,6 @@
 ---
 import ReviewsBar from "../widgets/ReviewsBar.astro";
+import Comparador from "./Comparador.astro";
 
 interface Props {
 	title: string;
@@ -18,81 +19,9 @@ const { title, subtitle } = Astro.props;
 
 <div class="px-6 -mt-55 relative z-10 pb-16">
 	<div class="max-w-3xl mx-auto">
-		<div 
-			id="dropzone"
-			class="bg-white rounded-[50px] border border-black py-32 md:py-40 px-16 cursor-pointer shadow-xl transition-all hover:border-gray-300 hover:shadow-lg"
-		>
-			<div class="flex flex-col items-center justify-center">
-				<p id="dropzone-text" class="text-black text-lg font-light">Arrastra tu factura aquí</p>
-				<input 
-					type="file" 
-					id="file-input" 
-					accept=".pdf,image/*" 
-					class="hidden"
-				/>
-			</div>
-		</div>
+		<Comparador />
 		<div class="mt-6 flex justify-center">
 			<ReviewsBar />
 		</div>
 	</div>
 </div>
-
-<script>
-	const dropzone = document.getElementById('dropzone');
-	const fileInput = document.getElementById('file-input') as HTMLInputElement;
-	const dropzoneText = document.getElementById('dropzone-text');
-
-	// Click to open file picker
-	dropzone?.addEventListener('click', () => {
-		fileInput?.click();
-	});
-
-	// Handle file selection
-	fileInput?.addEventListener('change', (e) => {
-		const target = e.target as HTMLInputElement;
-		if (target.files && target.files.length > 0) {
-			handleFile(target.files[0]);
-		}
-	});
-
-	// Drag and drop events
-	dropzone?.addEventListener('dragover', (e) => {
-		e.preventDefault();
-		dropzone.classList.add('border-black', 'bg-gray-50');
-		dropzone.classList.remove('border-gray-200');
-	});
-
-	dropzone?.addEventListener('dragleave', (e) => {
-		e.preventDefault();
-		dropzone.classList.remove('border-black', 'bg-gray-50');
-		dropzone.classList.add('border-gray-200');
-	});
-
-	dropzone?.addEventListener('drop', (e) => {
-		e.preventDefault();
-		dropzone.classList.remove('border-black', 'bg-gray-50');
-		dropzone.classList.add('border-gray-200');
-		
-		const files = e.dataTransfer?.files;
-		if (files && files.length > 0) {
-			const file = files[0];
-			// Check if file is PDF or image
-			if (file.type === 'application/pdf' || file.type.startsWith('image/')) {
-				handleFile(file);
-			} else {
-				alert('Por favor, sube un archivo PDF o una imagen.');
-			}
-		}
-	});
-
-	function handleFile(file: File) {
-		if (dropzoneText) {
-			dropzoneText.textContent = `Archivo seleccionado: ${file.name}`;
-			dropzoneText.classList.remove('text-gray-500');
-			dropzoneText.classList.add('text-black', 'font-medium');
-		}
-		// Here you can add logic to process the file
-		console.log('File uploaded:', file.name, file.type, file.size);
-	}
-</script>
