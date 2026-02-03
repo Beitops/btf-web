@@ -1,9 +1,11 @@
 function initComparadorDropzone() {
 	const dropzone = document.getElementById('dropzone');
 	const fileInput = document.getElementById('file-input');
-	const dropzoneText = document.getElementById('dropzone-text');
 
 	if (!dropzone || !fileInput) return;
+	if (dropzone.hasAttribute('data-comparador-initialized')) return;
+
+	dropzone.setAttribute('data-comparador-initialized', 'true');
 
 	// Click to open file picker
 	dropzone.addEventListener('click', () => {
@@ -47,13 +49,27 @@ function initComparadorDropzone() {
 		}
 	});
 
-	function handleFile(file: File) {
-		if (dropzoneText) {
-			dropzoneText.textContent = `Archivo seleccionado: ${file.name}`;
-			dropzoneText.classList.remove('text-gray-500');
-			dropzoneText.classList.add('text-black', 'font-medium');
-		}
-		console.log('File uploaded:', file.name, file.type, file.size);
+	async function handleFile(file: File) {
+		const container = document.getElementById('comparador-modal-root');
+		if (!container) return;
+
+		const [{ default: React }, { createRoot }, { default: ComparadorIsla }] =
+			await Promise.all([
+				import('react'),
+				import('react-dom/client'),
+				import('../components/ComparadorIsla'),
+			]);
+
+		const root = createRoot(container);
+		const onClose = () => {
+			root.unmount();
+			if (fileInput instanceof HTMLInputElement) {
+				fileInput.value = '';
+			}
+		};
+		root.render(
+			React.createElement(ComparadorIsla, { file, onClose })
+		);
 	}
 }
 
@@ -63,4 +79,5 @@ if (typeof document !== 'undefined') {
 	} else {
 		initComparadorDropzone();
 	}
+	document.addEventListener('astro:page-load', initComparadorDropzone);
 }
