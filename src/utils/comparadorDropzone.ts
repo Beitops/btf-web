@@ -67,8 +67,37 @@ function initComparadorDropzone() {
 				fileInput.value = '';
 			}
 		};
+		const onAnalyze = (data: { file: File; nombre: string; telefono: string }) => {
+			root.unmount();
+			queueMicrotask(async () => {
+				const [
+					{ default: ReactLib },
+					{ createRoot: createRootLib },
+					{ default: Dashboard },
+				] = await Promise.all([
+					import('react'),
+					import('react-dom/client'),
+					import('../components/Dashboard'),
+				]);
+				const dashboardRoot = createRootLib(container);
+				const onCloseDashboard = () => {
+					dashboardRoot.unmount();
+					if (fileInput instanceof HTMLInputElement) {
+						fileInput.value = '';
+					}
+				};
+				dashboardRoot.render(
+					ReactLib.createElement(Dashboard, {
+						file: data.file,
+						nombre: data.nombre,
+						telefono: data.telefono,
+						onClose: onCloseDashboard,
+					})
+				);
+			});
+		};
 		root.render(
-			React.createElement(ComparadorIsla, { file, onClose })
+			React.createElement(ComparadorIsla, { file, onClose, onAnalyze })
 		);
 	}
 }
