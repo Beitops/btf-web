@@ -273,8 +273,8 @@ const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, onClose }) => {
 				formData.append('telefono', telefono);
 				formData.append('file', file);
 
-				const apiUrl = import.meta.env.BTF_API_URL;
-				const apiToken = import.meta.env.BTF_API_TOKEN;
+				const apiUrl = import.meta.env.PUBLIC_BTF_API_URL;
+				const apiToken = import.meta.env.PUBLIC_BTF_API_TOKEN;
 
 				const res = await fetch(
 					`${apiUrl}comparador/clientes/factura`,
