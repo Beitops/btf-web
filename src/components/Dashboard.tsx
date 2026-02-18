@@ -349,216 +349,126 @@ const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, onClose }) => {
 
 				{/* Results */}
 				{!loading && !error && factura && (
-					<div className="flex flex-1 flex-col gap-10">
-						{/* Subtitle */}
-						<p
-							className="text-center text-base text-gray-500 md:text-lg"
-							style={{
-								fontFamily:
-									"var(--font-family-secondary, 'Montserrat', sans-serif)",
-							}}
-						>
-							Este es el análisis personalizado de tu factura
-						</p>
-
-						{/* Two-column cards */}
-						<div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
-							{/* ── LEFT: Tu factura actual ── */}
-							<div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm md:p-8">
-								{/* Card header */}
-								<div className="mb-6 flex items-center gap-3">
-									<div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/40">
-										<svg
-											className="h-5 w-5 text-gray-800"
-											fill="none"
-											stroke="currentColor"
-											viewBox="0 0 24 24"
-										>
-											<path
-												strokeLinecap="round"
-												strokeLinejoin="round"
-												strokeWidth={2}
-												d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-											/>
-										</svg>
-									</div>
-									<div>
-										<h2
-											className="text-lg font-bold text-gray-900"
-											style={{
-												fontFamily:
-													"var(--font-primary, 'Poppins', sans-serif)",
-											}}
-										>
-											Tu factura actual
-										</h2>
-										{factura.nombreProveedor && (
-											<p className="text-sm text-gray-500">
-												{factura.nombreProveedor}
-											</p>
-										)}
-									</div>
-								</div>
-
-								{/* Stats grid */}
-								{infoLuz ? (
-									<div className="grid grid-cols-2 gap-5">
-										<Stat
-											label="Coste total"
-											value={`${euro(infoLuz.precioTotal)} €`}
-											large
-										/>
-										<Stat
-											label="Consumo"
-											value={`${infoLuz.energiaConsumida ?? '—'} kWh`}
-											large
-										/>
-										<Stat
-											label="Periodo"
-											value={`${fmtDate(infoLuz.fechaInicio)} — ${fmtDate(infoLuz.fechaFin)}`}
-										/>
-										<Stat
-											label="Días facturados"
-											value={`${infoLuz.diasFacturados ?? '—'} días`}
-										/>
-										<Stat
-											label="Potencia contratada"
-											value={`${infoLuz.potenciaContratadaP1 ?? '—'} kW`}
-										/>
-										<Stat
-											label="Tarifa"
-											value={infoLuz.peaje ?? '—'}
-										/>
-										{(infoLuz.consumoP1 != null ||
-											infoLuz.consumoP2 != null) && (
-											<>
-												<Stat
-													label="Consumo P1 (punta)"
-													value={`${euro(infoLuz.consumoP1)} kWh`}
-												/>
-												<Stat
-													label="Consumo P2 (valle)"
-													value={`${euro(infoLuz.consumoP2)} kWh`}
-												/>
-											</>
-										)}
-									</div>
-								) : (
-									<p className="text-sm text-gray-400">
-										Información de luz no disponible
-									</p>
-								)}
-							</div>
-
-							{/* ── RIGHT: Tu mejor oferta ── */}
-							<div className="relative overflow-hidden rounded-3xl border-2 border-[#00bf63]/30 bg-white p-6 shadow-sm md:p-8">
-								{/* Accent stripe */}
-								<div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-[#00bf63] to-[#00bf63]/50" />
-
-								{/* Card header */}
-								<div className="mb-6 flex items-center gap-3">
-									<div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#00bf63]/15">
-										<svg
-											className="h-5 w-5 text-[#00bf63]"
-											viewBox="0 0 24 24"
-											fill="currentColor"
-										>
-											<path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.27 5.82 22 7 14.14l-5-4.87 6.91-1.01L12 2z" />
-										</svg>
-									</div>
-									<div>
-										<h2
-											className="text-lg font-bold text-gray-900"
-											style={{
-												fontFamily:
-													"var(--font-primary, 'Poppins', sans-serif)",
-											}}
-										>
-											Tu mejor oferta
-										</h2>
-										{bestSaving?.provider_name && (
-											<p className="text-sm text-[#00bf63] font-semibold">
-												{bestSaving.provider_name}
-											</p>
-										)}
-									</div>
-								</div>
-
-								{bestSaving ? (
-									<div className="space-y-6">
-										{/* Highlight savings */}
-										<div className="rounded-2xl bg-[#00bf63]/5 p-5">
-											<div className="grid grid-cols-2 gap-5">
-												<Stat
-													label="Ahorro anual"
-													value={`${euro(bestSaving.yearly_savings)} €`}
-													highlight
-													large
-												/>
-												<Stat
-													label="Ahorro por factura"
-													value={`${euro(bestSaving.invoice_savings)} €`}
-													highlight
-													large
-												/>
-											</div>
-										</div>
-
-										{/* Detail stats */}
-										<div className="grid grid-cols-2 gap-5">
-											<Stat
-												label="Nuevo total factura"
-												value={`${euro(bestSaving.total_amount)} €`}
-											/>
-											<Stat
-												label="Coste energía"
-												value={`${euro(bestSaving.energy_cost)} €`}
-											/>
-											<Stat
-												label="Coste potencia"
-												value={`${euro(bestSaving.power_cost)} €`}
-											/>
-											{(bestSaving.service_cost ?? 0) > 0 && (
-												<Stat
-													label="Coste servicio"
-													value={`${euro(bestSaving.service_cost)} €`}
-												/>
-											)}
-										</div>
-									</div>
-								) : (
-									<p className="text-sm text-gray-400">
-										Información comparativa no disponible
-									</p>
-								)}
-							</div>
-						</div>
-
-						{/* ── CTA Section ── */}
-						{bestSaving && yearlySavings > 0 && (
-							<div className="mt-4 flex flex-col items-center gap-6 rounded-3xl bg-linear-to-br from-gray-50 to-white px-6 py-10 text-center md:py-12">
-								<p
-									className="text-xl font-bold text-gray-900 md:text-2xl"
+					<div className="flex flex-1 flex-col gap-8 md:gap-12">
+						{/* Storytelling content */}
+						<div className="mx-auto w-full max-w-3xl space-y-8 md:space-y-10">
+							{/* First message */}
+							<div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm md:p-8 lg:p-10">
+								<div
+									className="space-y-4 text-center"
 									style={{
 										fontFamily:
-											"var(--font-primary, 'Poppins', sans-serif)",
+											"var(--font-family-secondary, 'Montserrat', sans-serif)",
 									}}
 								>
-									¿Quieres empezar a ahorrar{' '}
-									<span className="text-[#00bf63]">
-										{euro(yearlySavings)} €/año
-									</span>
-									?
-								</p>
-								<button
-									type="button"
-									disabled
-									className="rounded-full bg-[#00bf63] px-12 py-4 text-lg font-bold text-white shadow-lg shadow-[#00bf63]/25 transition-all hover:brightness-110 focus:outline-none focus:ring-4 focus:ring-[#00bf63]/30 disabled:cursor-default"
-								>
-									Sí, quiero ahorrar
-								</button>
+									<p className="text-lg leading-relaxed text-gray-700 md:text-xl md:leading-relaxed lg:text-2xl">
+										Has pagado{' '}
+										<span
+											className="font-bold text-red-600"
+											style={{
+												fontFamily:
+													"var(--font-primary, 'Poppins', sans-serif)",
+											}}
+										>
+											{euro(infoLuz?.precioTotal ?? 0)}€
+										</span>{' '}
+										en tu factura con{' '}
+										<span
+											className="font-bold text-gray-900"
+											style={{
+												fontFamily:
+													"var(--font-primary, 'Poppins', sans-serif)",
+											}}
+										>
+											{factura.nombreProveedor ?? 'tu compañía actual'}
+										</span>
+										.
+									</p>
+									<p className="text-lg text-gray-600">
+										Esto es bastante más de lo que se paga ahora mismo en el
+										mercado 👎🏼
+									</p>
+								</div>
 							</div>
-						)}
+
+							{/* Second message */}
+							{bestSaving && (
+								<div className="relative overflow-hidden rounded-3xl border-2 border-[#00bf63]/30 bg-white p-6 shadow-sm md:p-8 lg:p-10">
+									{/* Accent stripe */}
+									<div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-[#00bf63] to-[#00bf63]/50" />
+
+									<div
+										className="space-y-6 text-center"
+										style={{
+											fontFamily:
+												"var(--font-family-secondary, 'Montserrat', sans-serif)",
+										}}
+									>
+										<p className="text-lg leading-relaxed text-gray-700 md:text-xl md:leading-relaxed lg:text-2xl">
+											Nuestra inteligencia artificial ha analizado tu caso y con
+											tu consumo actual de{' '}
+											<span
+												className="font-bold text-gray-900"
+												style={{
+													fontFamily:
+														"var(--font-primary, 'Poppins', sans-serif)",
+												}}
+											>
+												{infoLuz?.energiaConsumida != null
+													? `${infoLuz.energiaConsumida} kWh`
+													: '— kWh'}
+											</span>{' '}
+											podrías empezar a pagar{' '}
+											<span
+												className="font-bold text-[#00bf63]"
+												style={{
+													fontFamily:
+														"var(--font-primary, 'Poppins', sans-serif)",
+												}}
+											>
+												{euro(bestSaving.total_amount ?? 0)}€
+											</span>
+											.
+										</p>
+										{yearlySavings > 0 && (
+											<div className="space-y-6">
+												<div className="space-y-2">
+													<p className="text-lg leading-relaxed text-gray-700 md:text-xl md:leading-relaxed lg:text-2xl">
+														Lo que supondría un ahorro anual de
+													</p>
+													<div className="flex items-baseline justify-center">
+														<span
+															className="text-4xl font-bold text-[#00bf63] md:text-5xl lg:text-6xl"
+															style={{
+																fontFamily:
+																	"var(--font-primary, 'Poppins', sans-serif)",
+															}}
+														>
+															{euro(yearlySavings)}€
+														</span>
+													</div>
+												</div>
+												<div className="space-y-4 pt-4">
+													<p className="text-lg font-semibold text-gray-900 md:text-xl">
+														¿Quieres empezar a pagar menos de una vez?
+													</p>
+													<button
+														type="button"
+														className="mx-auto rounded-full bg-[#00bf63] px-8 py-4 text-lg font-bold text-white shadow-lg shadow-[#00bf63]/25 transition-all hover:brightness-110 focus:outline-none focus:ring-4 focus:ring-[#00bf63]/30 md:px-12 md:py-5"
+														style={{
+															fontFamily:
+																"var(--font-primary, 'Poppins', sans-serif)",
+														}}
+													>
+														¡Sí, quiero pagar menos!
+													</button>
+												</div>
+											</div>
+										)}
+									</div>
+								</div>
+							)}
+						</div>
 					</div>
 				)}
 			</div>
