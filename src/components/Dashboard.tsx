@@ -1,4 +1,8 @@
 import React, { useState, useEffect, type FC } from 'react';
+import Ahorrable from './comparador/Ahorrable';
+import BonoSocial from './comparador/BonoSocial';
+import NoAhorrable from './comparador/NoAhorrable';
+import type { ApiResponse, FacturaData, SavingCalculation } from '../types/factura';
 
 /* ─── Types ──────────────────────────────────────────────────── */
 
@@ -7,75 +11,6 @@ export interface DashboardProps {
 	nombre?: string;
 	telefono?: string;
 	onClose?: () => void;
-}
-
-interface InformacionLuz {
-	validacionLuz?: string;
-	cups?: string;
-	peaje?: string;
-	fechaInicio?: string;
-	fechaFin?: string;
-	diasFacturados?: number;
-	energiaConsumida?: number;
-	precioTotal?: number;
-	consumoP1?: number;
-	consumoP2?: number;
-	consumoP3?: number;
-	potenciaContratadaP1?: number;
-	potenciaContratadaP2?: number;
-	costeServicio?: number;
-	discriminacionHoraria?: string;
-	annual_consumption?: number;
-	[key: string]: unknown;
-}
-
-interface SavingCalculation {
-	provider_name?: string;
-	plan_name?: string;
-	invoice_savings?: number;
-	yearly_savings?: number;
-	total_amount?: number;
-	energy_cost?: number;
-	power_cost?: number;
-	discount_cost?: number;
-	service_cost?: number;
-	[key: string]: unknown;
-}
-
-interface InformacionComparativa {
-	savings_status?: string;
-	electric_information?: {
-		total_cost?: number;
-		recalculated_total_cost?: number;
-		[key: string]: unknown;
-	};
-	saving_calculations?: SavingCalculation[];
-}
-
-interface FacturaData {
-	status?: string;
-	nombreProveedor?: string;
-	idRegistro?: number;
-	nif?: string | null;
-	isCif?: boolean | null;
-	cupsLuz?: string | null;
-	informacionLuz?: InformacionLuz | null;
-	informacionComparativa?: InformacionComparativa | null;
-}
-
-interface ApiResponse {
-	success: boolean;
-	message: string;
-	data: {
-		cliente: unknown;
-		factura: FacturaData | null;
-		rawManifest: unknown;
-	} | null;
-	errors?: {
-		cliente?: { code: string; message: string };
-		factura?: { code: string; message: string };
-	};
-	warnings?: Array<{ source: string; code: string; message: string }>;
 }
 
 /* ─── Helpers ────────────────────────────────────────────────── */
@@ -87,12 +22,6 @@ const euro = (v?: number) =>
 				maximumFractionDigits: 2,
 			})
 		: '—';
-
-const fmtDate = (d?: string) => {
-	if (!d) return '—';
-	const p = d.split('-');
-	return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : d;
-};
 
 /* ─── Sub-components ─────────────────────────────────────────── */
 
@@ -223,38 +152,14 @@ const ErrorView: FC<{ message: string }> = ({ message }) => (
 	</div>
 );
 
-/* --- Stat pill inside cards ---------------------------------- */
-
-const Stat: FC<{
-	label: string;
-	value: string;
-	highlight?: boolean;
-	large?: boolean;
-}> = ({ label, value, highlight, large }) => (
-	<div className="flex flex-col gap-0.5">
-		<span
-			className="text-xs font-medium uppercase tracking-wider text-gray-400"
-			style={{
-				fontFamily: "var(--font-family-secondary, 'Montserrat', sans-serif)",
-			}}
-		>
-			{label}
-		</span>
-		<span
-			className={`font-bold ${large ? 'text-2xl md:text-3xl' : 'text-lg md:text-xl'} ${highlight ? 'text-[#00bf63]' : 'text-gray-900'}`}
-			style={{ fontFamily: "var(--font-primary, 'Poppins', sans-serif)" }}
-		>
-			{value}
-		</span>
-	</div>
-);
-
 /* ─── Main component ─────────────────────────────────────────── */
 
 const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, onClose }) => {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [factura, setFactura] = useState<FacturaData | null>(null);
+	const [ahorrosPositivos, setAhorrosPositivos] = useState<SavingCalculation[]>([]);
+	const [mejorAhorro, setMejorAhorro] = useState<SavingCalculation | null>(null);
 
 	/* --- API call on mount --- */
 	useEffect(() => {
@@ -290,7 +195,28 @@ const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, onClose }) => {
 				console.log('[Dashboard API Response]', json);
 
 				if (json.success && json.data?.factura) {
-					setFactura(json.data.factura);
+					const facturaResponse = json.data.factura;
+					const savingCalculations =
+						facturaResponse.informacionComparativa?.saving_calculations ?? [];
+					const positivos = savingCalculations.filter(
+						(saving) => (saving.invoice_savings ?? 0) > 0,
+					);
+					const nombreProveedorActual = (facturaResponse.nombreProveedor ?? '')
+						.trim()
+						.toLowerCase();
+					const positivosOrdenados = [...positivos].sort(
+						(a, b) => (b.invoice_savings ?? 0) - (a.invoice_savings ?? 0),
+					);
+					const mejor =
+						positivosOrdenados.find(
+							(saving) =>
+								(saving.provider_name ?? '').trim().toLowerCase() !==
+								nombreProveedorActual,
+						) ?? null;
+
+					setFactura(facturaResponse);
+					setAhorrosPositivos(positivos);
+					setMejorAhorro(mejor);
 				} else {
 					const msg = json.errors
 						? [json.errors.cliente?.message, json.errors.factura?.message]
@@ -299,11 +225,15 @@ const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, onClose }) => {
 						: json.message;
 					console.error('[Dashboard API Error]', msg || json.message);
 					setError(msg || 'No se pudo procesar la factura.');
+					setAhorrosPositivos([]);
+					setMejorAhorro(null);
 				}
 			} catch (err: unknown) {
 				if (err instanceof DOMException && err.name === 'AbortError') return;
 				console.error('[Dashboard Network Error]', (err as Error).message);
 				setError('Error de conexión. Por favor, inténtalo de nuevo.');
+				setAhorrosPositivos([]);
+				setMejorAhorro(null);
 			} finally {
 				setLoading(false);
 			}
@@ -312,18 +242,6 @@ const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, onClose }) => {
 		fetchFactura();
 		return () => controller.abort();
 	}, [file, nombre, telefono]);
-
-	/* --- Derived data --- */
-	const infoLuz = factura?.informacionLuz;
-	const savings = factura?.informacionComparativa?.saving_calculations;
-	const bestSaving =
-		savings
-			?.filter((s) => (s.yearly_savings ?? 0) > 0)
-			.sort((a, b) => (b.yearly_savings ?? 0) - (a.yearly_savings ?? 0))[0] ??
-		savings?.[0] ??
-		null;
-
-	const yearlySavings = bestSaving?.yearly_savings ?? 0;
 
 	/* --- Render --- */
 	return (
@@ -349,127 +267,15 @@ const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, onClose }) => {
 
 				{/* Results */}
 				{!loading && !error && factura && (
-					<div className="flex flex-1 flex-col gap-8 md:gap-12">
-						{/* Storytelling content */}
-						<div className="mx-auto w-full max-w-3xl space-y-8 md:space-y-10">
-							{/* First message */}
-							<div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm md:p-8 lg:p-10">
-								<div
-									className="space-y-4 text-center"
-									style={{
-										fontFamily:
-											"var(--font-family-secondary, 'Montserrat', sans-serif)",
-									}}
-								>
-									<p className="text-lg leading-relaxed text-gray-700 md:text-xl md:leading-relaxed lg:text-2xl">
-										Has pagado{' '}
-										<span
-											className="font-bold text-red-600"
-											style={{
-												fontFamily:
-													"var(--font-primary, 'Poppins', sans-serif)",
-											}}
-										>
-											{euro(infoLuz?.precioTotal ?? 0)}€
-										</span>{' '}
-										en tu factura con{' '}
-										<span
-											className="font-bold text-gray-900"
-											style={{
-												fontFamily:
-													"var(--font-primary, 'Poppins', sans-serif)",
-											}}
-										>
-											{factura.nombreProveedor ?? 'tu compañía actual'}
-										</span>
-										.
-									</p>
-									<p className="text-lg text-gray-600">
-										Esto es bastante más de lo que se paga ahora mismo en el
-										mercado 👎🏼
-									</p>
-								</div>
-							</div>
-
-							{/* Second message */}
-							{bestSaving && (
-								<div className="relative overflow-hidden rounded-3xl border-2 border-[#00bf63]/30 bg-white p-6 shadow-sm md:p-8 lg:p-10">
-									{/* Accent stripe */}
-									<div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-[#00bf63] to-[#00bf63]/50" />
-
-									<div
-										className="space-y-6 text-center"
-										style={{
-											fontFamily:
-												"var(--font-family-secondary, 'Montserrat', sans-serif)",
-										}}
-									>
-										<p className="text-lg leading-relaxed text-gray-700 md:text-xl md:leading-relaxed lg:text-2xl">
-											Nuestra inteligencia artificial ha analizado tu caso y con
-											tu consumo actual de{' '}
-											<span
-												className="font-bold text-gray-900"
-												style={{
-													fontFamily:
-														"var(--font-primary, 'Poppins', sans-serif)",
-												}}
-											>
-												{infoLuz?.energiaConsumida != null
-													? `${infoLuz.energiaConsumida} kWh`
-													: '— kWh'}
-											</span>{' '}
-											podrías empezar a pagar{' '}
-											<span
-												className="font-bold text-[#00bf63]"
-												style={{
-													fontFamily:
-														"var(--font-primary, 'Poppins', sans-serif)",
-												}}
-											>
-												{euro(bestSaving.total_amount ?? 0)}€
-											</span>
-											.
-										</p>
-										{yearlySavings > 0 && (
-											<div className="space-y-6">
-												<div className="space-y-2">
-													<p className="text-lg leading-relaxed text-gray-700 md:text-xl md:leading-relaxed lg:text-2xl">
-														Lo que supondría un ahorro anual de
-													</p>
-													<div className="flex items-baseline justify-center">
-														<span
-															className="text-4xl font-bold text-[#00bf63] md:text-5xl lg:text-6xl"
-															style={{
-																fontFamily:
-																	"var(--font-primary, 'Poppins', sans-serif)",
-															}}
-														>
-															{euro(yearlySavings)}€
-														</span>
-													</div>
-												</div>
-												<div className="space-y-4 pt-4">
-													<p className="text-lg font-semibold text-gray-900 md:text-xl">
-														¿Quieres empezar a pagar menos de una vez?
-													</p>
-													<button
-														type="button"
-														className="mx-auto rounded-full bg-[#00bf63] px-8 py-4 text-lg font-bold text-white shadow-lg shadow-[#00bf63]/25 transition-all hover:brightness-110 focus:outline-none focus:ring-4 focus:ring-[#00bf63]/30 md:px-12 md:py-5"
-														style={{
-															fontFamily:
-																"var(--font-primary, 'Poppins', sans-serif)",
-														}}
-													>
-														¡Sí, quiero pagar menos!
-													</button>
-												</div>
-											</div>
-										)}
-									</div>
-								</div>
-							)}
-						</div>
-					</div>
+					<>
+						{factura.bonoSocial ? (
+							<BonoSocial />
+						) : ahorrosPositivos.length > 0 && mejorAhorro ? (
+							<Ahorrable factura={factura} ahorroSeleccionado={mejorAhorro} euro={euro} />
+						) : (
+							<NoAhorrable />
+						)}
+					</>
 				)}
 			</div>
 		</div>
