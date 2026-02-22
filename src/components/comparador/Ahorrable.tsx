@@ -5,9 +5,15 @@ interface AhorrableProps {
 	factura: FacturaData;
 	ahorroSeleccionado: SavingCalculation;
 	euro: (v?: number) => string;
+	onContinue: () => void;
 }
 
-const Ahorrable: FC<AhorrableProps> = ({ factura, ahorroSeleccionado, euro }) => {
+const Ahorrable: FC<AhorrableProps> = ({
+	factura,
+	ahorroSeleccionado,
+	euro,
+	onContinue,
+}) => {
 	const infoLuz = factura.informacionLuz;
 	const yearlySavings = ahorroSeleccionado.yearly_savings ?? 0;
 
@@ -99,6 +105,7 @@ const Ahorrable: FC<AhorrableProps> = ({ factura, ahorroSeleccionado, euro }) =>
 									</p>
 									<button
 										type="button"
+										onClick={onContinue}
 										className="mx-auto rounded-full bg-[#00bf63] px-8 py-4 text-lg font-bold text-white shadow-lg shadow-[#00bf63]/25 transition-all hover:brightness-110 focus:outline-none focus:ring-4 focus:ring-[#00bf63]/30 md:px-12 md:py-5"
 										style={{
 											fontFamily: "var(--font-primary, 'Poppins', sans-serif)",

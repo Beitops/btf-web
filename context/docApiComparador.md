@@ -52,6 +52,7 @@ Se devuelve **200** cuando **al menos una** de las dos operaciones (cliente o fa
   status: string;           // ej. "success"
   nombreProveedor: string;
   idRegistro: number;
+  informacionContratacion: object | null; // estructura según esave.json
   nif: string | null;
   isCif: boolean | null;
   cupsLuz: string | null;
@@ -95,6 +96,7 @@ Se devuelve **200** cuando **al menos una** de las dos operaciones (cliente o fa
       "status": "success",
       "nombreProveedor": "TotalEnergies",
       "idRegistro": 51609,
+      "informacionContratacion": { ... },
       "nif": "60133175C",
       "isCif": false,
       "cupsLuz": "ES0031405980663017EG0F",

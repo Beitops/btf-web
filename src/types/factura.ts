@@ -31,6 +31,19 @@ export interface SavingCalculation {
 	[key: string]: unknown;
 }
 
+export interface TitularFactura {
+	name?: string;
+	surname?: string;
+	fullName?: string;
+}
+
+export interface InformacionContratacion {
+	titularFactura?: TitularFactura | null;
+	emailLead?: string | null;
+	nif?: string | null;
+	[key: string]: unknown;
+}
+
 export interface InformacionComparativa {
 	savings_status?: string;
 	electric_information?: {
@@ -49,15 +62,31 @@ export interface FacturaData {
 	isCif?: boolean | null;
 	bonoSocial?: boolean;
 	cupsLuz?: string | null;
+	informacionContratacion?: InformacionContratacion | null;
 	informacionLuz?: InformacionLuz | null;
 	informacionComparativa?: InformacionComparativa | null;
+}
+
+export interface ClienteData {
+	id?: number;
+	nombre?: string;
+	telefono?: string;
+	fecha_creacion?: string;
+	email?: string | null;
+	[key: string]: unknown;
+}
+
+export interface ClienteResult {
+	inserted?: boolean;
+	cliente?: ClienteData | null;
+	[key: string]: unknown;
 }
 
 export interface ApiResponse {
 	success: boolean;
 	message: string;
 	data: {
-		cliente: unknown;
+		cliente: ClienteResult | null;
 		factura: FacturaData | null;
 		rawManifest: unknown;
 	} | null;

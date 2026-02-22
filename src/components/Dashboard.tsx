@@ -2,7 +2,38 @@ import React, { useState, useEffect, type FC } from 'react';
 import Ahorrable from './comparador/Ahorrable';
 import BonoSocial from './comparador/BonoSocial';
 import NoAhorrable from './comparador/NoAhorrable';
+import PasoContratacion, {
+	type ContratacionFormData,
+} from './comparador/PasoContratacion';
+import PasoSuministroGestion, {
+	type SuministroGestionFormData,
+} from './comparador/PasoSuministroGestion';
+import PasoFinalContratacion, {
+	type DireccionFacturacionData,
+	type FinalContratacionFormData,
+} from './comparador/PasoFinalContratacion';
 import type { ApiResponse, FacturaData, SavingCalculation } from '../types/factura';
+import EndesaLogo from '../assets/comercializadoras/Endesa.svg';
+import IberdrolaLogo from '../assets/comercializadoras/Iberdrola.svg';
+import NaturgyLogo from '../assets/comercializadoras/Naturgy.svg';
+import OctopusLogo from '../assets/comercializadoras/Octopus.svg';
+import OptimusLogo from '../assets/comercializadoras/Optimus.svg';
+import RepsolLogo from '../assets/comercializadoras/Repsol.svg';
+import WekiwiLogo from '../assets/comercializadoras/Wekiwi.svg';
+
+type LogoAsset = {
+	src: string;
+};
+
+const providerLogoByName: Record<string, LogoAsset> = {
+	Endesa: EndesaLogo,
+	Iberdrola: IberdrolaLogo,
+	Naturgy: NaturgyLogo,
+	Octopus: OctopusLogo,
+	Optimus: OptimusLogo,
+	Repsol: RepsolLogo,
+	Wekiwi: WekiwiLogo,
+};
 
 /* ─── Types ──────────────────────────────────────────────────── */
 
@@ -11,6 +42,12 @@ export interface DashboardProps {
 	nombre?: string;
 	telefono?: string;
 	onClose?: () => void;
+}
+
+interface WizardFormData {
+	contratacion: ContratacionFormData;
+	suministroGestion: SuministroGestionFormData;
+	finalContratacion: FinalContratacionFormData;
 }
 
 /* ─── Helpers ────────────────────────────────────────────────── */
@@ -22,6 +59,50 @@ const euro = (v?: number) =>
 				maximumFractionDigits: 2,
 			})
 		: '—';
+
+const streetPrefixRegex =
+	/^\s*(?:(?:c(?:\/|\.)?)|calle|cl|cll|v[ií]a|via|av(?:da)?|avenida|ps|pso|paseo|ronda|pl|plaza|camino|cmno|carretera|ctra|crta|trav(?:es[ií]a)?)\b[\s.,/-]*/i;
+
+const normalizeStreetName = (street: string): string =>
+	street.replace(streetPrefixRegex, '').replace(/\s{2,}/g, ' ').trim();
+
+const keepLettersNumbersAndSpaces = (value: string): string =>
+	value.replace(/[^0-9A-Za-zÀ-ÖØ-öø-ÿ\s]/g, '').replace(/\s{2,}/g, ' ').trim();
+
+const uppercaseFirstLetterIfStartsWithLetter = (value: string): string => {
+	if (!value) return value;
+	const firstChar = value.charAt(0);
+	if (/\d/.test(firstChar)) return value;
+	if (/[A-Za-zÀ-ÖØ-öø-ÿ]/.test(firstChar)) {
+		return firstChar.toUpperCase() + value.slice(1);
+	}
+	return value;
+};
+
+const sanitizeAddressField = (value: string): string =>
+	uppercaseFirstLetterIfStartsWithLetter(keepLettersNumbersAndSpaces(value));
+
+const getAddressText = (address: Record<string, unknown>, ...keys: string[]) => {
+	for (const key of keys) {
+		const value = address[key];
+		if (typeof value === 'string' && value.trim()) return value.trim();
+	}
+	return '';
+};
+
+const extractAddressObject = (rawAddress: unknown): Record<string, unknown> | null => {
+	if (!rawAddress) return null;
+	if (Array.isArray(rawAddress)) {
+		for (const candidate of rawAddress) {
+			if (candidate && typeof candidate === 'object') {
+				return candidate as Record<string, unknown>;
+			}
+		}
+		return null;
+	}
+	if (typeof rawAddress === 'object') return rawAddress as Record<string, unknown>;
+	return null;
+};
 
 /* ─── Sub-components ─────────────────────────────────────────── */
 
@@ -56,6 +137,45 @@ const Greeting: FC<{ nombre?: string }> = ({ nombre }) => (
 	>
 		Hola, {nombre ?? 'usuario'}!
 	</h1>
+);
+
+const PasoDosHeading: FC<{ nombreProveedor: string }> = ({ nombreProveedor }) => (
+	<div>
+		<h2
+			className="text-2xl font-bold text-gray-900 md:text-3xl"
+			style={{ fontFamily: "var(--font-primary, 'Poppins', sans-serif)" }}
+		>
+			Estás a un solo paso de ahorrar con:
+		</h2>
+		<div className="mt-4">
+			{(() => {
+				const nombreLimpio = nombreProveedor.trim();
+				if (!nombreLimpio) {
+					return (
+						<p className="text-xl font-semibold text-gray-900 md:text-2xl">
+							tu nueva compañía
+						</p>
+					);
+				}
+
+				const nombreFormateado =
+					nombreLimpio.charAt(0).toUpperCase() + nombreLimpio.slice(1).toLowerCase();
+				const logoAsset = providerLogoByName[nombreFormateado];
+
+				if (logoAsset?.src) {
+					return (
+						<img
+							src={logoAsset.src}
+							alt={`Logo de ${nombreLimpio}`}
+							className="mx-auto h-12 w-auto object-contain md:h-14"
+						/>
+					);
+				}
+
+				return <p className="text-xl font-semibold text-gray-900 md:text-2xl">{nombreLimpio}</p>;
+			})()}
+		</div>
+	</div>
 );
 
 /* --- Loading ------------------------------------------------- */
@@ -160,6 +280,41 @@ const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, onClose }) => {
 	const [factura, setFactura] = useState<FacturaData | null>(null);
 	const [ahorrosPositivos, setAhorrosPositivos] = useState<SavingCalculation[]>([]);
 	const [mejorAhorro, setMejorAhorro] = useState<SavingCalculation | null>(null);
+	const [pasoWizard, setPasoWizard] = useState<1 | 2 | 3 | 4>(1);
+	const [datosFormulario, setDatosFormulario] = useState<WizardFormData>({
+		contratacion: {
+			nombre: '',
+			apellidos: '',
+			dniNie: '',
+			email: '',
+			telefono: '',
+		},
+		suministroGestion: {
+			calle: '',
+			numero: '',
+			piso: '',
+			letra: '',
+			comunidadAutonoma: '',
+			ciudad: '',
+			cups: '',
+			potenciaContratadap2: '',
+			potenciaContratadap1: '',
+			companiaActual: '',
+			tipoGestion: 'cambio_compania',
+		},
+		finalContratacion: {
+			iban: '',
+			direccionFacturacionDiferente: false,
+			direccionFacturacion: {
+				calle: '',
+				numero: '',
+				piso: '',
+				letra: '',
+				comunidadAutonoma: '',
+				ciudad: '',
+			},
+		},
+	});
 
 	/* --- API call on mount --- */
 	useEffect(() => {
@@ -196,6 +351,41 @@ const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, onClose }) => {
 
 				if (json.success && json.data?.factura) {
 					const facturaResponse = json.data.factura;
+					const direccionSuministroObject = extractAddressObject(
+						facturaResponse.informacionContratacion?.direccionSuministro,
+					);
+					const calle = sanitizeAddressField(
+						normalizeStreetName(
+							direccionSuministroObject
+								? getAddressText(direccionSuministroObject, 'street')
+								: '',
+						),
+					);
+					const numero = sanitizeAddressField(
+						direccionSuministroObject
+							? getAddressText(direccionSuministroObject, 'number')
+							: '',
+					);
+					const piso = sanitizeAddressField(
+						direccionSuministroObject
+							? getAddressText(direccionSuministroObject, 'floor')
+							: '',
+					);
+					const letra = sanitizeAddressField(
+						direccionSuministroObject
+							? getAddressText(direccionSuministroObject, 'letter')
+							: '',
+					);
+					const comunidadAutonoma = sanitizeAddressField(
+						direccionSuministroObject
+							? getAddressText(direccionSuministroObject, 'state')
+							: '',
+					);
+					const ciudad = sanitizeAddressField(
+						direccionSuministroObject
+							? getAddressText(direccionSuministroObject, 'city')
+							: '',
+					);
 					const savingCalculations =
 						facturaResponse.informacionComparativa?.saving_calculations ?? [];
 					const positivos = savingCalculations.filter(
@@ -204,19 +394,72 @@ const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, onClose }) => {
 					const nombreProveedorActual = (facturaResponse.nombreProveedor ?? '')
 						.trim()
 						.toLowerCase();
-					const positivosOrdenados = [...positivos].sort(
-						(a, b) => (b.invoice_savings ?? 0) - (a.invoice_savings ?? 0),
+					const proveedorActualEsNaturgy = nombreProveedorActual === 'naturgy';
+					const positivosFiltradosPorProveedor = positivos.filter((saving) => {
+						const proveedorSaving = (saving.provider_name ?? '').trim().toLowerCase();
+						return proveedorActualEsNaturgy
+							? proveedorSaving !== 'naturgy'
+							: proveedorSaving === 'naturgy';
+					});
+					const positivosOrdenados = [...positivosFiltradosPorProveedor].sort(
+						(a, b) => (a.total_amount ?? Number.POSITIVE_INFINITY) - (b.total_amount ?? Number.POSITIVE_INFINITY),
 					);
 					const mejor =
-						positivosOrdenados.find(
-							(saving) =>
-								(saving.provider_name ?? '').trim().toLowerCase() !==
-								nombreProveedorActual,
-						) ?? null;
+						positivosOrdenados[0] ?? null;
+					const titularFactura = facturaResponse.informacionContratacion?.titularFactura;
+					const telefonoCliente = json.data?.cliente?.cliente?.telefono ?? '';
 
 					setFactura(facturaResponse);
 					setAhorrosPositivos(positivos);
 					setMejorAhorro(mejor);
+					setPasoWizard(1);
+					setDatosFormulario({
+						contratacion: {
+							nombre: titularFactura?.name ?? '',
+							apellidos: titularFactura?.surname ?? '',
+							dniNie: facturaResponse.informacionContratacion?.nif ?? '',
+							email: facturaResponse.informacionContratacion?.emailLead ?? '',
+							telefono: telefonoCliente,
+						},
+						suministroGestion: {
+							calle,
+							numero,
+							piso,
+							letra,
+							comunidadAutonoma,
+							ciudad,
+							cups:
+								(facturaResponse.informacionLuz?.cups as string) ??
+								facturaResponse.cupsLuz ??
+								'',
+							potenciaContratadap2: String(
+								(facturaResponse.informacionLuz?.potenciaContratadap2 as number | string | undefined) ??
+									facturaResponse.informacionLuz?.potenciaContratadaP2 ??
+									'',
+							),
+							potenciaContratadap1: String(
+								(facturaResponse.informacionLuz?.potenciaContratadap1 as number | string | undefined) ??
+									facturaResponse.informacionLuz?.potenciaContratadaP1 ??
+									'',
+							),
+							companiaActual: facturaResponse.nombreProveedor ?? '',
+							tipoGestion: 'cambio_compania',
+						},
+						finalContratacion: {
+							iban: '',
+							direccionFacturacionDiferente: false,
+							direccionFacturacion: {
+								calle: '',
+								numero: '',
+								piso: '',
+								letra: '',
+								comunidadAutonoma: '',
+								ciudad: '',
+							},
+						},
+					});
+
+
 				} else {
 					const msg = json.errors
 						? [json.errors.cliente?.message, json.errors.factura?.message]
@@ -227,6 +470,7 @@ const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, onClose }) => {
 					setError(msg || 'No se pudo procesar la factura.');
 					setAhorrosPositivos([]);
 					setMejorAhorro(null);
+					setPasoWizard(1);
 				}
 			} catch (err: unknown) {
 				if (err instanceof DOMException && err.name === 'AbortError') return;
@@ -234,6 +478,7 @@ const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, onClose }) => {
 				setError('Error de conexión. Por favor, inténtalo de nuevo.');
 				setAhorrosPositivos([]);
 				setMejorAhorro(null);
+				setPasoWizard(1);
 			} finally {
 				setLoading(false);
 			}
@@ -242,6 +487,117 @@ const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, onClose }) => {
 		fetchFactura();
 		return () => controller.abort();
 	}, [file, nombre, telefono]);
+
+	const handleContractFieldChange = (
+		field: keyof ContratacionFormData,
+		value: string,
+	) => {
+		setDatosFormulario((previous) => ({
+			...previous,
+			contratacion: {
+				...previous.contratacion,
+				[field]: value,
+			},
+		}));
+	};
+
+	const handleSupplyFieldChange = (
+		field: keyof SuministroGestionFormData,
+		value: string,
+	) => {
+		const addressFields: Array<keyof SuministroGestionFormData> = [
+			'calle',
+			'numero',
+			'piso',
+			'letra',
+			'comunidadAutonoma',
+			'ciudad',
+		];
+		const nextValue =
+			addressFields.includes(field) ? sanitizeAddressField(value) : value;
+
+		setDatosFormulario((previous) => ({
+			...previous,
+			suministroGestion: {
+				...previous.suministroGestion,
+				[field]:
+					field === 'tipoGestion'
+						? (value as SuministroGestionFormData['tipoGestion'])
+						: nextValue,
+			},
+		}));
+	};
+
+	const handleIbanChange = (value: string) => {
+		setDatosFormulario((previous) => ({
+			...previous,
+			finalContratacion: {
+				...previous.finalContratacion,
+				iban: value,
+			},
+		}));
+	};
+
+	const handleBillingAddressToggle = (checked: boolean) => {
+		setDatosFormulario((previous) => ({
+			...previous,
+			finalContratacion: {
+				...previous.finalContratacion,
+				direccionFacturacionDiferente: checked,
+				direccionFacturacion: checked
+					? previous.finalContratacion.direccionFacturacion
+					: {
+							calle: '',
+							numero: '',
+							piso: '',
+							letra: '',
+							comunidadAutonoma: '',
+							ciudad: '',
+						},
+			},
+		}));
+	};
+
+	const handleBillingAddressFieldChange = (
+		field: keyof DireccionFacturacionData,
+		value: string,
+	) => {
+		const nextValue =
+			field === 'calle'
+				? sanitizeAddressField(normalizeStreetName(value))
+				: sanitizeAddressField(value);
+
+		setDatosFormulario((previous) => ({
+			...previous,
+			finalContratacion: {
+				...previous.finalContratacion,
+				direccionFacturacion: {
+					...previous.finalContratacion.direccionFacturacion,
+					[field]: nextValue,
+				},
+			},
+		}));
+	};
+
+	const handleContinueContract = () => {
+		setPasoWizard(3);
+	};
+
+	const handleSubmitSupply = () => {
+		setPasoWizard(4);
+	};
+
+	const handleBackFromSupply = () => {
+		setPasoWizard(2);
+	};
+
+	const handleBackFromFinal = () => {
+		setPasoWizard(3);
+	};
+
+	const handleSubmitFinalStep = () => {
+		// Paso reservado para integrar el envio final de contratacion.
+	};
 
 	/* --- Render --- */
 	return (
@@ -256,7 +612,11 @@ const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, onClose }) => {
 			<div className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-5 py-10 md:px-8 md:py-14">
 				{/* Greeting */}
 				<div className="mb-8 text-center md:mb-10">
-					<Greeting nombre={nombre} />
+					{(pasoWizard === 2 || pasoWizard === 3 || pasoWizard === 4) && mejorAhorro ? (
+						<PasoDosHeading nombreProveedor={mejorAhorro.provider_name ?? ''} />
+					) : (
+						<Greeting nombre={nombre} />
+					)}
 				</div>
 
 				{/* Loading */}
@@ -271,7 +631,46 @@ const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, onClose }) => {
 						{factura.bonoSocial ? (
 							<BonoSocial />
 						) : ahorrosPositivos.length > 0 && mejorAhorro ? (
-							<Ahorrable factura={factura} ahorroSeleccionado={mejorAhorro} euro={euro} />
+							<>
+								{pasoWizard === 1 ? (
+									<Ahorrable
+										factura={factura}
+										ahorroSeleccionado={mejorAhorro}
+										euro={euro}
+										onContinue={() => setPasoWizard(2)}
+									/>
+								) : (
+									<>
+										{pasoWizard === 2 ? (
+											<PasoContratacion
+												data={datosFormulario.contratacion}
+												onFieldChange={handleContractFieldChange}
+												onSubmit={handleContinueContract}
+											/>
+										) : pasoWizard === 3 ? (
+											<PasoSuministroGestion
+												data={datosFormulario.suministroGestion}
+												onFieldChange={handleSupplyFieldChange}
+												onBack={handleBackFromSupply}
+												onSubmit={handleSubmitSupply}
+											/>
+										) : (
+											<PasoFinalContratacion
+												data={datosFormulario.finalContratacion}
+												ahorroAnual={`${euro(mejorAhorro.yearly_savings ?? 0)}€`}
+												companiaElegida={
+													mejorAhorro.provider_name?.trim() || 'Tu nueva compañía'
+												}
+												onBack={handleBackFromFinal}
+												onIbanChange={handleIbanChange}
+												onDireccionFacturacionDiferenteChange={handleBillingAddressToggle}
+												onDireccionFacturacionFieldChange={handleBillingAddressFieldChange}
+												onSubmit={handleSubmitFinalStep}
+											/>
+										)}
+									</>
+								)}
+							</>
 						) : (
 							<NoAhorrable />
 						)}
