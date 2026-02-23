@@ -132,10 +132,10 @@ const CloseButton: FC<{ onClick: () => void }> = ({ onClick }) => (
 
 const Greeting: FC<{ nombre?: string }> = ({ nombre }) => (
 	<h1
-		className="text-3xl font-bold text-gray-900 md:text-4xl"
+		className="text-2xl font-bold text-gray-900 md:text-3xl"
 		style={{ fontFamily: "var(--font-primary, 'Poppins', sans-serif)" }}
 	>
-		Hola, {nombre ?? 'usuario'}!
+		Hola, {nombre ?? 'usuario'} 👋🏼
 	</h1>
 );
 
