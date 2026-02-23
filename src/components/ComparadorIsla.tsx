@@ -102,7 +102,6 @@ const ComparadorIsla: FC<ComparadorIslaProps> = ({
                 <form
                     onSubmit={handleSubmit}
                     className=" flex flex-col gap-4"
-                    noValidate
                 >
                     <input
                         type="text"
@@ -110,6 +109,7 @@ const ComparadorIsla: FC<ComparadorIslaProps> = ({
                         placeholder="Nombre..."
                         className="w-full rounded-2xl border border-black/20 bg-white px-4 py-3 text-black placeholder:text-black/70 focus:border-black/40 focus:outline-none focus:ring-2 focus:ring-black/10"
                         autoComplete="name"
+                        required
                     />
                     <input
                         type="tel"
@@ -117,6 +117,7 @@ const ComparadorIsla: FC<ComparadorIslaProps> = ({
                         placeholder="Número de WhatsApp..."
                         className="w-full rounded-2xl border border-black/20 bg-white px-4 py-3 text-black placeholder:text-black/70 focus:border-black/40 focus:outline-none focus:ring-2 focus:ring-black/10"
                         autoComplete="tel"
+                        required
                     />
                     <button
                         type="submit"
