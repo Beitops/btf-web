@@ -56,7 +56,7 @@ const Error: FC = () => {
 							}}
 						>
 							<svg
-								className="h-6 w-6"
+								className="h-12 w-12 md:h-6 md:w-6"
 								fill="currentColor"
 								viewBox="0 0 24 24"
 								aria-hidden
