@@ -41,6 +41,7 @@ export interface InformacionContratacion {
 	titularFactura?: TitularFactura | null;
 	emailLead?: string | null;
 	nif?: string | null;
+	fechaFinContrato?: string | null;
 	[key: string]: unknown;
 }
 

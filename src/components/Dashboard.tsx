@@ -3,6 +3,7 @@ import Ahorrable from './comparador/Ahorrable';
 import BonoSocial from './comparador/BonoSocial';
 import Error from './comparador/Error';
 import NoAhorrable from './comparador/NoAhorrable';
+import YaEsCliente from './comparador/YaEsCliente';
 import PasoContratacion, {
 	type ContratacionFormData,
 } from './comparador/PasoContratacion';
@@ -278,6 +279,7 @@ const ErrorView: FC<{ message: string }> = ({ message }) => (
 const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, onClose }) => {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [clienteInserted, setClienteInserted] = useState<boolean | null>(null);
 	const [factura, setFactura] = useState<FacturaData | null>(null);
 	const [ahorrosPositivos, setAhorrosPositivos] = useState<SavingCalculation[]>([]);
 	const [mejorAhorro, setMejorAhorro] = useState<SavingCalculation | null>(null);
@@ -410,6 +412,7 @@ const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, onClose }) => {
 					const titularFactura = facturaResponse.informacionContratacion?.titularFactura;
 					const telefonoCliente = json.data?.cliente?.cliente?.telefono ?? '';
 
+					setClienteInserted(json.data?.cliente?.inserted ?? null);
 					setFactura(facturaResponse);
 					setAhorrosPositivos(positivos);
 					setMejorAhorro(mejor);
@@ -460,7 +463,18 @@ const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, onClose }) => {
 						},
 					});
 
-
+				} else if (
+					json.success &&
+					json.data?.cliente &&
+					json.data.cliente.inserted === false
+				) {
+					// Cliente ya existía en la BD: factura viene null, no es error
+					setClienteInserted(false);
+					setFactura(null);
+					setError(null);
+					setAhorrosPositivos([]);
+					setMejorAhorro(null);
+					setPasoWizard(1);
 				} else {
 					const msg = json.errors
 						? [json.errors.cliente?.message, json.errors.factura?.message]
@@ -469,6 +483,7 @@ const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, onClose }) => {
 						: json.message;
 					console.error('[Dashboard API Error]', msg || json.message);
 					setError(msg || 'No se pudo procesar la factura.');
+					setClienteInserted(null);
 					setAhorrosPositivos([]);
 					setMejorAhorro(null);
 					setPasoWizard(1);
@@ -477,6 +492,7 @@ const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, onClose }) => {
 				if (err instanceof DOMException && err.name === 'AbortError') return;
 				console.error('[Dashboard Network Error]', (err as Error).message);
 				setError('Error de conexión. Por favor, inténtalo de nuevo.');
+				setClienteInserted(null);
 				setAhorrosPositivos([]);
 				setMejorAhorro(null);
 				setPasoWizard(1);
@@ -624,16 +640,18 @@ const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, onClose }) => {
 				{loading && <LoadingView />}
 
 				{/* Error */}
-				{!loading && error && <ErrorView message={error} />}
+				{!loading && error && <Error/>}
 
 				{/* Results */}
-				{!loading && !error && factura && (
+				{!loading && !error && (factura || clienteInserted === false) && (
 					<>
-						{factura.informacionLuz?.validacionLuz !== 'OK' ? (
+						{clienteInserted === false ? (
+							<YaEsCliente />
+						) : factura?.informacionLuz?.validacionLuz !== 'OK' ? (
 							<Error />
-						) : factura.bonoSocial ? (
+						) : factura?.bonoSocial ? (
 							<BonoSocial />
-						) : ahorrosPositivos.length > 0 && mejorAhorro ? (
+						) : factura && ahorrosPositivos.length > 0 && mejorAhorro ? (
 							<>
 								{pasoWizard === 1 ? (
 									<Ahorrable
@@ -675,7 +693,7 @@ const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, onClose }) => {
 								)}
 							</>
 						) : (
-							<NoAhorrable />
+							<NoAhorrable factura={factura} />
 						)}
 					</>
 				)}
