@@ -1,6 +1,7 @@
 import React, { useState, useEffect, type FC } from 'react';
 import Ahorrable from './comparador/Ahorrable';
 import BonoSocial from './comparador/BonoSocial';
+import Error from './comparador/Error';
 import NoAhorrable from './comparador/NoAhorrable';
 import PasoContratacion, {
 	type ContratacionFormData,
@@ -628,7 +629,9 @@ const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, onClose }) => {
 				{/* Results */}
 				{!loading && !error && factura && (
 					<>
-						{factura.bonoSocial ? (
+						{factura.informacionLuz?.validacionLuz !== 'OK' ? (
+							<Error />
+						) : factura.bonoSocial ? (
 							<BonoSocial />
 						) : ahorrosPositivos.length > 0 && mejorAhorro ? (
 							<>
