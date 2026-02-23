@@ -4,11 +4,11 @@ const WHATSAPP_LINK = 'https://wa.link/cgm2ip';
 
 const YaEsCliente: FC = () => {
 	return (
-		<div className="flex flex-1 flex-col gap-8 md:gap-12">
-			<div className="mx-auto w-full max-w-3xl space-y-8 md:space-y-10">
+		<div className="flex flex-1 flex-col">
+			<div className="mx-auto w-full max-w-3xl">
 				<div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm md:p-8 lg:p-10">
 					<div
-						className="space-y-5 text-center"
+						className="flex flex-col items-center gap-5 text-center md:gap-6"
 						style={{
 							fontFamily: "var(--font-family-secondary, 'Montserrat', sans-serif)",
 						}}
@@ -25,23 +25,11 @@ const YaEsCliente: FC = () => {
 						<p className="text-xl leading-relaxed text-gray-700 md:text-2xl md:leading-relaxed">
 							Si quieres que hagamos una doble revisión de tu factura escríbenos por WhatsApp.
 						</p>
-					</div>
-				</div>
-
-				<div className="relative overflow-hidden rounded-3xl border-2 border-amber-200/60 bg-linear-to-b from-amber-50/80 to-white p-6 shadow-sm md:p-8 lg:p-10">
-					<div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-amber-400 to-amber-200" />
-
-					<div
-						className="flex flex-col items-center gap-6 text-center"
-						style={{
-							fontFamily: "var(--font-family-secondary, 'Montserrat', sans-serif)",
-						}}
-					>
 						<a
 							href={WHATSAPP_LINK}
 							target="_blank"
 							rel="noopener noreferrer"
-							className="inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] px-8 py-4 text-lg font-bold text-white shadow-lg shadow-[#25D366]/25 transition-all hover:brightness-110 focus:outline-none focus:ring-4 focus:ring-[#25D366]/30 md:px-10 md:py-5"
+							className="mt-2 inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] px-8 py-4 text-lg font-bold text-white shadow-lg shadow-[#25D366]/25 transition-all hover:brightness-110 focus:outline-none focus:ring-4 focus:ring-[#25D366]/30 md:px-10 md:py-5"
 							style={{
 								fontFamily: "var(--font-primary, 'Poppins', sans-serif)",
 							}}

@@ -619,7 +619,7 @@ const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, onClose }) => {
 	/* --- Render --- */
 	return (
 		<div
-			className="fixed inset-0 z-9999 flex flex-col overflow-y-auto bg-linear-to-b from-[#fffde6] via-white to-white"
+			className="fixed inset-0 z-9999 flex flex-col overflow-y-auto bg-linear-to-b from-primary to-[color-mix(in_srgb,var(--color-primary)_90%,white)]"
 			role="dialog"
 			aria-modal="true"
 			aria-label="Dashboard de ahorro"
