@@ -19,10 +19,9 @@ import EndesaLogo from '../assets/comercializadoras/Endesa.svg';
 import IberdrolaLogo from '../assets/comercializadoras/Iberdrola.svg';
 import NaturgyLogo from '../assets/comercializadoras/Naturgy.svg';
 import OctopusLogo from '../assets/comercializadoras/Octopus.svg';
-import OptimusLogo from '../assets/comercializadoras/Optimus.svg';
 import RepsolLogo from '../assets/comercializadoras/Repsol.svg';
 import WekiwiLogo from '../assets/comercializadoras/Wekiwi.svg';
-
+import NeoluxLogo from '../assets/comercializadoras/Neolux.svg';
 type LogoAsset = {
 	src: string;
 };
@@ -32,7 +31,7 @@ const providerLogoByName: Record<string, LogoAsset> = {
 	Iberdrola: IberdrolaLogo,
 	Naturgy: NaturgyLogo,
 	Octopus: OctopusLogo,
-	Optimus: OptimusLogo,
+	Neolux: NeoluxLogo,
 	Repsol: RepsolLogo,
 	Wekiwi: WekiwiLogo,
 };
