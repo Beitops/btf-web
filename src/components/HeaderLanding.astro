@@ -1,0 +1,17 @@
+---
+import logo from '../assets/logo.png';
+import OptimizedImage from './OptimizedImage.astro';
+---
+
+<header class="bg-primary py-4 px-4 sticky top-0 z-40">
+	<div class="flex items-center justify-center">
+		<OptimizedImage
+			src={logo}
+			alt="Bajatufactura"
+			loading="eager"
+			width={1080}
+			height={300}
+			class="h-[62px] w-auto lg:h-auto lg:w-[325px]"
+		/>
+	</div>
+</header>

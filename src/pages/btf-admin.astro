@@ -1,0 +1,388 @@
+---
+import { getAllPromociones, crearPromocion, actualizarPromocion, eliminarPromocion } from '../lib/promociones';
+
+const ADMIN_PASSWORD = import.meta.env.BTF_ADMIN_PASSWORD;
+const BASE_URL = 'https://bajatufactura.es/luz';
+
+const cookies = Astro.request.headers.get('cookie') ?? '';
+const isAuth = cookies.includes(`btf_admin=${ADMIN_PASSWORD}`);
+
+if (Astro.request.method === 'POST') {
+  const body = await Astro.request.formData();
+  const action = body.get('action');
+
+  if (action === 'login') {
+    const password = body.get('password');
+    if (password === ADMIN_PASSWORD) {
+      return new Response(null, {
+        status: 302,
+        headers: {
+          'Set-Cookie': `btf_admin=${ADMIN_PASSWORD}; Path=/btf-admin; HttpOnly; SameSite=Strict`,
+          'Location': '/btf-admin',
+        },
+      });
+    }
+  }
+
+  if (!isAuth) return new Response('No autorizado', { status: 401 });
+
+  if (action === 'crear') {
+    const utmCampaign = String(body.get('utm_campaign')).trim();
+    await crearPromocion({
+      slug: utmCampaign,
+      nombre: String(body.get('nombre')),
+      descripcion: body.get('descripcion') ? String(body.get('descripcion')) : null,
+      regalo: body.get('regalo') ? String(body.get('regalo')) : null,
+      activa: body.get('activa') === 'on',
+      fecha_inicio: body.get('fecha_inicio') ? String(body.get('fecha_inicio')) : null,
+      fecha_fin: body.get('fecha_fin') ? String(body.get('fecha_fin')) : null,
+      utm_source: body.get('utm_source') ? String(body.get('utm_source')) : null,
+      utm_medium: body.get('utm_medium') ? String(body.get('utm_medium')) : null,
+    });
+    return Astro.redirect('/btf-admin');
+  }
+
+  if (action === 'editar') {
+    const id = Number(body.get('id'));
+    const utmCampaign = String(body.get('utm_campaign')).trim();
+    await actualizarPromocion(id, {
+      slug: utmCampaign,
+      nombre: String(body.get('nombre')),
+      descripcion: body.get('descripcion') ? String(body.get('descripcion')) : null,
+      regalo: body.get('regalo') ? String(body.get('regalo')) : null,
+      activa: body.get('activa') === 'on',
+      fecha_inicio: body.get('fecha_inicio') ? String(body.get('fecha_inicio')) : null,
+      fecha_fin: body.get('fecha_fin') ? String(body.get('fecha_fin')) : null,
+      utm_source: body.get('utm_source') ? String(body.get('utm_source')) : null,
+      utm_medium: body.get('utm_medium') ? String(body.get('utm_medium')) : null,
+    });
+    return Astro.redirect('/btf-admin');
+  }
+
+  if (action === 'toggle') {
+    const id = Number(body.get('id'));
+    const activa = body.get('activa') === 'true';
+    await actualizarPromocion(id, { activa: !activa });
+    return Astro.redirect('/btf-admin');
+  }
+
+  if (action === 'eliminar') {
+    const id = Number(body.get('id'));
+    await eliminarPromocion(id);
+    return Astro.redirect('/btf-admin');
+  }
+}
+
+const promociones = isAuth ? await getAllPromociones() : [];
+
+function buildUrl(p: { slug: string; utm_source: string | null; utm_medium: string | null }) {
+  const params = new URLSearchParams();
+  if (p.utm_source) params.set('utm_source', p.utm_source);
+  if (p.utm_medium) params.set('utm_medium', p.utm_medium);
+  params.set('utm_campaign', p.slug);
+  return `${BASE_URL}?${params.toString()}`;
+}
+
+function fmtDate(d: string | null) {
+  return d ? new Date(d).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
+}
+function fmtDatetimeLocal(d: string | null) {
+  if (!d) return '';
+  return new Date(d).toISOString().slice(0, 16);
+}
+---
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BTF Admin — Promociones</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', system-ui, sans-serif; background: #0f0f0f; color: #e5e5e5; min-height: 100vh; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+    h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 2rem; color: #fff; }
+    h2 { font-size: 0.85rem; font-weight: 700; margin-bottom: 1rem; color: #666; text-transform: uppercase; letter-spacing: 0.08em; }
+
+    .login-card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 1rem; padding: 2rem; max-width: 360px; margin: 6rem auto; text-align: center; }
+    .login-card h1 { margin-bottom: 1.5rem; }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .form-grid .full { grid-column: 1 / -1; }
+    label { display: block; font-size: 0.7rem; font-weight: 600; color: #666; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    input[type="text"], input[type="password"], input[type="datetime-local"], textarea {
+      width: 100%; background: #111; border: 1px solid #2a2a2a; border-radius: 0.5rem;
+      color: #e5e5e5; padding: 0.55rem 0.75rem; font-size: 0.85rem;
+    }
+    input:focus, textarea:focus { outline: none; border-color: #00bf63; }
+    .toggle-row { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: #aaa; }
+    .card { background: #1a1a1a; border: 1px solid #222; border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem; }
+
+    .btn { display: inline-flex; align-items: center; gap: 0.35rem; border: none; border-radius: 0.5rem; padding: 0.55rem 1.1rem; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: opacity 0.15s; white-space: nowrap; }
+    .btn:hover { opacity: 0.82; }
+    .btn-green { background: #00bf63; color: #000; }
+    .btn-gray  { background: #2a2a2a; color: #e5e5e5; }
+    .btn-red   { background: #3a1111; color: #f87171; border: 1px solid #5a2020; }
+    .btn-blue  { background: #0f2a3a; color: #60a5fa; border: 1px solid #1a3f5a; }
+    .btn-sm    { padding: 0.3rem 0.7rem; font-size: 0.72rem; }
+
+    /* Table */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 750px; }
+    th { text-align: left; font-size: 0.68rem; font-weight: 700; color: #555; padding: 0.6rem 0.75rem; border-bottom: 1px solid #222; text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }
+    td { padding: 0.85rem 0.75rem; border-bottom: 1px solid #1a1a1a; font-size: 0.82rem; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #1f1f1f; }
+
+    .badge { display: inline-flex; align-items: center; gap: 0.25rem; border-radius: 9999px; padding: 0.2rem 0.65rem; font-size: 0.7rem; font-weight: 700; }
+    .badge-on  { background: #00bf6318; color: #00bf63; border: 1px solid #00bf6330; }
+    .badge-off { background: #ffffff08; color: #666; border: 1px solid #2a2a2a; }
+
+    .url-text { font-family: monospace; font-size: 0.7rem; color: #00bf63; word-break: break-all; line-height: 1.4; }
+    .copy-btn { background: transparent; border: 1px solid #2a2a2a; color: #666; border-radius: 0.35rem; padding: 0.15rem 0.5rem; font-size: 0.65rem; cursor: pointer; margin-top: 0.3rem; display: inline-block; transition: all 0.15s; }
+    .copy-btn:hover { border-color: #00bf63; color: #00bf63; }
+
+    .utm-tag { display: inline-block; background: #111; border: 1px solid #222; border-radius: 0.3rem; padding: 0.1rem 0.4rem; font-family: monospace; font-size: 0.65rem; color: #777; margin: 0.1rem 0.1rem 0 0; }
+
+    .actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+
+    /* Modal de edición */
+    .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 50; align-items: center; justify-content: center; padding: 1rem; }
+    .modal-backdrop.open { display: flex; }
+    .modal { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 1rem; padding: 1.75rem; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; }
+    .modal h2 { font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 1.25rem; }
+    .modal-close { float: right; background: none; border: none; color: #666; font-size: 1.2rem; cursor: pointer; line-height: 1; margin-top: -0.2rem; }
+    .modal-close:hover { color: #fff; }
+
+    .hint { font-size: 0.72rem; color: #555; margin-bottom: 0.75rem; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  {!isAuth ? (
+    <div class="login-card">
+      <h1>🔒 BTF Admin</h1>
+      <form method="POST">
+        <input type="hidden" name="action" value="login" />
+        <div style="margin-bottom:1rem">
+          <label>Contraseña</label>
+          <input type="password" name="password" autofocus required />
+        </div>
+        <button type="submit" class="btn btn-green" style="width:100%;justify-content:center">Entrar</button>
+      </form>
+    </div>
+  ) : (
+    <>
+      <h1>BTF Admin — Promociones</h1>
+
+      <!-- Crear nueva -->
+      <div class="card">
+        <h2>Nueva promoción</h2>
+        <p class="hint">URL generada: <span style="color:#00bf63;font-family:monospace">https://bajatufactura.es/luz?utm_source=…&utm_medium=…&utm_campaign=…</span></p>
+        <form method="POST">
+          <input type="hidden" name="action" value="crear" />
+          <div class="form-grid">
+            <div>
+              <label>Nombre *</label>
+              <input type="text" name="nombre" placeholder="Feria de Sevilla 2026" required />
+            </div>
+            <div>
+              <label>Regalo</label>
+              <input type="text" name="regalo" placeholder="50€ de regalo" />
+            </div>
+            <div>
+              <label>utm_campaign * <span style="color:#444;font-weight:400">(identificador)</span></label>
+              <input type="text" name="utm_campaign" placeholder="feria_sevilla" required pattern="[a-z0-9_\-]+" title="Solo minúsculas, números, guiones" />
+            </div>
+            <div>
+              <label>utm_source</label>
+              <input type="text" name="utm_source" placeholder="qr" />
+            </div>
+            <div>
+              <label>utm_medium</label>
+              <input type="text" name="utm_medium" placeholder="offline" />
+            </div>
+            <div>
+              <label>Descripción</label>
+              <input type="text" name="descripcion" placeholder="Descripción interna" />
+            </div>
+            <div>
+              <label>Fecha inicio</label>
+              <input type="datetime-local" name="fecha_inicio" />
+            </div>
+            <div>
+              <label>Fecha fin</label>
+              <input type="datetime-local" name="fecha_fin" />
+            </div>
+            <div class="full toggle-row">
+              <input type="checkbox" name="activa" id="activa" checked />
+              <label for="activa" style="margin:0;text-transform:none;font-size:0.85rem;color:#aaa">Activa al crear</label>
+            </div>
+            <div class="full" style="margin-top:0.25rem">
+              <button type="submit" class="btn btn-green">+ Crear promoción</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Listado -->
+      <div class="card">
+        <h2>Promociones ({promociones.length})</h2>
+        {promociones.length === 0 ? (
+          <p style="color:#555;font-size:0.85rem">No hay promociones todavía.</p>
+        ) : (
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre / Regalo</th>
+                  <th>URL generada</th>
+                  <th>UTM params</th>
+                  <th>Estado</th>
+                  <th>Vigencia</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {promociones.map((p) => {
+                  const url = buildUrl(p);
+                  const urlId = `url-${p.id}`;
+                  return (
+                    <tr>
+                      <td>
+                        <div style="font-weight:600;color:#e5e5e5">{p.nombre}</div>
+                        {p.regalo && <div style="color:#00bf63;font-size:0.75rem;margin-top:0.2rem">{p.regalo}</div>}
+                      </td>
+                      <td style="max-width:220px">
+                        <div class="url-text" id={urlId}>{url}</div>
+                        <button class="copy-btn" onclick={`navigator.clipboard.writeText(document.getElementById('${urlId}').textContent);this.textContent='✓ Copiada';setTimeout(()=>this.textContent='Copiar URL',1800)`}>
+                          Copiar URL
+                        </button>
+                      </td>
+                      <td>
+                        <span class="utm-tag">source: {p.utm_source ?? '—'}</span>
+                        <span class="utm-tag">medium: {p.utm_medium ?? '—'}</span>
+                        <span class="utm-tag">campaign: {p.slug}</span>
+                      </td>
+                      <td>
+                        <form method="POST" style="display:inline">
+                          <input type="hidden" name="action" value="toggle" />
+                          <input type="hidden" name="id" value={String(p.id)} />
+                          <input type="hidden" name="activa" value={String(p.activa)} />
+                          <button type="submit" class={`badge ${p.activa ? 'badge-on' : 'badge-off'}`} style="cursor:pointer;border:none;font-size:0.7rem" title={p.activa ? 'Clic para desactivar' : 'Clic para activar'}>
+                            {p.activa ? '● Activa' : '○ Inactiva'}
+                          </button>
+                        </form>
+                      </td>
+                      <td style="color:#555;font-size:0.75rem;white-space:nowrap">
+                        {p.fecha_inicio ? <div>Desde: {fmtDate(p.fecha_inicio)}</div> : null}
+                        {p.fecha_fin    ? <div>Hasta: {fmtDate(p.fecha_fin)}</div>    : <div style="color:#444">Sin caducidad</div>}
+                      </td>
+                      <td>
+                        <div class="actions">
+                          <button
+                            class="btn btn-blue btn-sm"
+                            onclick={`openEditModal(${JSON.stringify(JSON.stringify(p))})`}
+                          >
+                            ✏ Editar
+                          </button>
+                          <form method="POST" style="display:inline" onsubmit={`return confirm('¿Eliminar la promoción "${p.nombre}"? Esta acción no se puede deshacer.')`}>
+                            <input type="hidden" name="action" value="eliminar" />
+                            <input type="hidden" name="id" value={String(p.id)} />
+                            <button type="submit" class="btn btn-red btn-sm">✕ Borrar</button>
+                          </form>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </>
+  )}
+
+</div>
+
+<!-- Modal de edición -->
+<div class="modal-backdrop" id="edit-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeEditModal()">✕</button>
+    <h2>Editar promoción</h2>
+    <form method="POST" id="edit-form">
+      <input type="hidden" name="action" value="editar" />
+      <input type="hidden" name="id" id="edit-id" />
+      <div class="form-grid">
+        <div>
+          <label>Nombre *</label>
+          <input type="text" name="nombre" id="edit-nombre" required />
+        </div>
+        <div>
+          <label>Regalo</label>
+          <input type="text" name="regalo" id="edit-regalo" />
+        </div>
+        <div>
+          <label>utm_campaign *</label>
+          <input type="text" name="utm_campaign" id="edit-campaign" required pattern="[a-z0-9_\-]+" />
+        </div>
+        <div>
+          <label>utm_source</label>
+          <input type="text" name="utm_source" id="edit-source" />
+        </div>
+        <div>
+          <label>utm_medium</label>
+          <input type="text" name="utm_medium" id="edit-medium" />
+        </div>
+        <div>
+          <label>Descripción</label>
+          <input type="text" name="descripcion" id="edit-descripcion" />
+        </div>
+        <div>
+          <label>Fecha inicio</label>
+          <input type="datetime-local" name="fecha_inicio" id="edit-inicio" />
+        </div>
+        <div>
+          <label>Fecha fin</label>
+          <input type="datetime-local" name="fecha_fin" id="edit-fin" />
+        </div>
+        <div class="full toggle-row">
+          <input type="checkbox" name="activa" id="edit-activa" />
+          <label for="edit-activa" style="margin:0;text-transform:none;font-size:0.85rem;color:#aaa">Activa</label>
+        </div>
+        <div class="full" style="display:flex;gap:0.5rem;margin-top:0.25rem">
+          <button type="submit" class="btn btn-green">Guardar cambios</button>
+          <button type="button" class="btn btn-gray" onclick="closeEditModal()">Cancelar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openEditModal(jsonStr) {
+    const p = JSON.parse(jsonStr);
+    document.getElementById('edit-id').value = p.id;
+    document.getElementById('edit-nombre').value = p.nombre ?? '';
+    document.getElementById('edit-regalo').value = p.regalo ?? '';
+    document.getElementById('edit-campaign').value = p.slug ?? '';
+    document.getElementById('edit-source').value = p.utm_source ?? '';
+    document.getElementById('edit-medium').value = p.utm_medium ?? '';
+    document.getElementById('edit-descripcion').value = p.descripcion ?? '';
+    document.getElementById('edit-inicio').value = p.fecha_inicio ? p.fecha_inicio.slice(0,16) : '';
+    document.getElementById('edit-fin').value = p.fecha_fin ? p.fecha_fin.slice(0,16) : '';
+    document.getElementById('edit-activa').checked = p.activa;
+    document.getElementById('edit-modal').classList.add('open');
+  }
+  function closeEditModal() {
+    document.getElementById('edit-modal').classList.remove('open');
+  }
+  document.getElementById('edit-modal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeEditModal();
+  });
+</script>
+</body>
+</html>

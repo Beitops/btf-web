@@ -1,0 +1,531 @@
+{
+    "respuestaExitosa": {
+      "status": "string",
+      "status_code": 0,
+      "tipoFactura": "dual",
+      "tipoCliente": "domestico",
+      "proveedor": "string",
+      "nombreProveedor": "string",
+      "provincia": "string",
+      "codigoPostal": "string",
+      "idRegistro": 0,
+      "country": "ES",
+      "informacionContratacion": {
+        "dataValidation": {
+          "dataValidation": "OK"
+        },
+        "titularFactura": {
+          "name": "string",
+          "surname": "string",
+          "fullName": "string"
+        },
+        "emailLead": "string",
+        "phoneNumberLead": "string",
+        "nif": "string",
+        "isCif": true,
+        "iban": "string",
+        "tarifaGas": "string",
+        "tarifaLuz": "string",
+        "cupsLuz": "string",
+        "cupsGas": "string",
+        "distribuidora": "string",
+        "fechaEmision": "string",
+        "numeroFactura": "string",
+        "fechaFinContrato": "string",
+        "fechaFinPermanenciaContrato": "string",
+        "permanenciaContrato": "Si",
+        "potenciaContratada": 0,
+        "potenciaContratadaP1": 0,
+        "potenciaContratadaP2": 0,
+        "direccionSuministro": [
+          {
+            "searchAddress": "string",
+            "originalAddress": "string",
+            "standarizedAddress": "string",
+            "street": "string",
+            "number": "string",
+            "floor": "string",
+            "state": "string",
+            "letter": "string",
+            "city": "string",
+            "postalCode": "string",
+            "country": "string",
+            "address_type": "string",
+            "latitude": 0,
+            "longitude": 0
+          }
+        ]
+      },
+      "pvpc": true,
+      "tur": true,
+      "bonoSocial": true,
+      "informacionLuz": {
+        "validacionLuz": "OK",
+        "warnings": [
+          "string"
+        ],
+        "errors": "access_toll",
+        "diferencia": 0,
+        "cups": "string",
+        "peaje": "2.0A",
+        "discriminacionHoraria": "yes-punta-valle-llano",
+        "productoContratado": "string",
+        "cuotaMensual": true,
+        "fechaInicio": "string",
+        "fechaFin": "string",
+        "diasFacturados": 0,
+        "energiaConsumida": 0,
+        "consumoAcumulado": 0,
+        "consumoHorasPromo": 0,
+        "consumoHorasNoPromo": 0,
+        "precioTotal": 0,
+        "costeServicio": 0,
+        "descuentoServicio": 0,
+        "cuotaLuz": 0,
+        "bonoSocial": 0,
+        "otrosCostes": 0,
+        "otrosCostesConIva": 0,
+        "precioContador": 0,
+        "potenciaDemandadaP1": 0,
+        "potenciaDemandadaP2": 0,
+        "serviciosIncluidos": [
+          "string"
+        ],
+        "importeFijoMensual": 0,
+        "consumoP1": 0,
+        "consumoP2": 0,
+        "consumoP3": 0,
+        "potenciaContratadaP1": 0,
+        "potenciaContratadaP2": 0,
+        "ajusteEnergiaPotencia": 0,
+        "costeTopeGas": 0,
+        "iePercentage": 0,
+        "autoconsumo": [
+          {
+            "compensacionPrecio": 0,
+            "compensacionVertida": 0,
+            "compensacionTotal": 0
+          }
+        ],
+        "taxCosts": [
+          {
+            "electricTaxCost": 0,
+            "ivaCostGeneral": 0,
+            "ivaCostReduced": 0
+          }
+        ],
+        "preciosPotencia": [
+          {
+            "power_price": 0,
+            "duration": 0,
+            "power_line": "string",
+            "power_supplied": 0,
+            "type": "string",
+            "discount": 0,
+            "y_coord": 0,
+            "total_cost": 0
+          }
+        ],
+        "preciosEnergia": [
+          {
+            "usage_price": 0,
+            "energy_amount": 0,
+            "time_discrimination_type": "string",
+            "original_value": "string",
+            "total_cost": 0,
+            "start_date": "string",
+            "discount": 0,
+            "completed": true
+          }
+        ],
+        "tarifaPlanaInfo": [
+          {
+            "consumoMaximo": 0,
+            "consumoAcumulado": 0
+          }
+        ],
+        "iva": 0
+      },
+      "informacionGas": {
+        "validacionGas": "OK",
+        "diferencia": 0,
+        "otrosCostes": 0,
+        "otrosCostesConIva": 0,
+        "cups": "string",
+        "peaje": "3.1",
+        "fechaInicio": "string",
+        "fechaFin": "string",
+        "cuotaMensual": true,
+        "diasFacturados": 0,
+        "precioTotal": 0,
+        "preciosTerminoFijo": [
+          {
+            "fixed_price": 0,
+            "duration": 0,
+            "unit": "string",
+            "total_cost": 0,
+            "discount": 0
+          }
+        ],
+        "preciosEnergia": [
+          {
+            "usage_price": 0,
+            "gas_amount": 0,
+            "total_cost": 0,
+            "discount": 0
+          }
+        ],
+        "energiaConsumida": 0,
+        "consumoAcumulado": 0,
+        "costeServicio": 0,
+        "serviciosIncluidos": [
+          "string"
+        ],
+        "descuentoTerminoFijo": 0,
+        "descuentoTerminoVariable": 0,
+        "ajusteFijoVariable": 0,
+        "costeContador": 0,
+        "precioContador": 0,
+        "cuotaGas": 0,
+        "tarifaPlanaInfo": [
+          {
+            "consumoMaximo": 0,
+            "consumoAcumulado": 0
+          }
+        ],
+        "iva": 0
+      },
+      "informacionComparativa": {
+        "savings_status": "SAVINGS_NOT_REQUESTED",
+        "electric_information": {
+          "total_cost": 0,
+          "recalculated_total_cost": 0,
+          "energy_cost": 0,
+          "power_cost": 0,
+          "energy_power_adjustment": 0,
+          "coste_tope_gas": 0,
+          "discount_cost": 0,
+          "discount_energy_cost": 0,
+          "discount_power_cost": 0,
+          "self_consumption_cost": 0,
+          "self_consumption_accum_cost": 0,
+          "self_consumption_accum_cost_used": 0,
+          "electric_meter_cost": 0,
+          "service_cost": 0,
+          "company_fee": 0,
+          "other_cost_luz": 0,
+          "bono_social": 0,
+          "ie_base_cost": 0,
+          "electric_tax_cost": 0,
+          "tax_base": 0,
+          "tax_base_others": 0,
+          "iva_cost": 0,
+          "other_cost": 0,
+          "additional_cost_iva": 0
+        },
+        "gas_information": {
+          "total_cost": 0,
+          "energy_cost": 0,
+          "fixed_cost": 0,
+          "fixed_variable_adjustment": 0,
+          "discount_cost": 0,
+          "energy_discount_cost": 0,
+          "fixed_discount_cost": 0,
+          "gas_meter_cost": 0,
+          "service_cost": 0,
+          "company_fee": 0,
+          "other_cost_gas": 0,
+          "gas_tax_cost": 0,
+          "iva_cost": 0,
+          "other_cost": 0
+        },
+        "saving_calculations": [
+          {
+            "plan_code": "string",
+            "plan_name": "string",
+            "invoice_savings": 0,
+            "gas_savings": 0,
+            "yearly_savings": 0,
+            "energy_cost": 0,
+            "power_cost": 0,
+            "total_amount": 0,
+            "discount_cost": 0,
+            "service_cost": 0,
+            "self_consumption_cost": 0,
+            "gas_total_cost": 0,
+            "variable_cost": 0,
+            "fixed_cost": 0,
+            "gas_service_cost": 0
+          }
+        ]
+      }
+    },
+    "respuestaExitosaEjemplo": {
+      "status": "success",
+      "registerId": 51609,
+      "status_code": 200,
+      "tipoFactura": "electric",
+      "tipoCliente": "domestico",
+      "proveedor": "WFYC_TOT",
+      "nombreProveedor": "TotalEnergies",
+      "provincia": "Cataluna",
+      "codigoPostal": "08031",
+      "idRegistro": 51609,
+      "country": "ES",
+      "informacionContratacion": {
+        "dataValidation": "OK",
+        "titularFactura": {
+          "name": "Melvin",
+          "surname": "Rosario Estrella",
+          "fullName": "Melvin Rosario Estrella"
+        },
+        "emailLead": null,
+        "phoneNumber": null,
+        "tarifaGas": null,
+        "tarifaLuz": "2.0TD",
+        "nif": "60133175C",
+        "isCif": false,
+        "idType": "nif",
+        "cupsLuz": "ES0031405980663017EG0F",
+        "cupsGas": null,
+        "fechaEmision": "2025-09-04",
+        "numeroFactura": "1NSN250900091152",
+        "fechaFinContrato": "2025-12-02",
+        "permanenciaContrato": "No",
+        "fechaFinPermanenciaContrato": null,
+        "potenciaContratadaP1": 4.6,
+        "potenciaContratadaP2": 4.6,
+        "iban": "ES0031405980663017",
+        "cnae": null,
+        "contract_number": null,
+        "direccionSuministro": {
+          "searchAddress": "cl cl cadi 13 3 2 barcelona - barcelona",
+          "originalAddress": "cl cl cadi 13 3 2 barcelona - barcelona",
+          "standarizedAddress": "cl cl cadi 13, Piso 3 Letra 2, 08031, Barcelona, Cataluna",
+          "street": "cl cl cadi",
+          "number": "13",
+          "floor": "3",
+          "letter": "2",
+          "state": "Cataluna",
+          "city": "Barcelona",
+          "postalCode": "08031",
+          "country": "Spain",
+          "addressType": "Calle"
+        },
+        "fiscalAddress": {},
+        "distribuidora": "Endesa"
+      },
+      "pvpc": false,
+      "bonoSocial": false,
+      "informacionLuz": {
+        "validacionLuz": "OK",
+        "cups": "ES0031405980663017EG0F",
+        "peaje": "2.0TD",
+        "discriminacionHoraria": "yes-1te-1tp",
+        "cuotaMensual": false,
+        "fechaInicio": "2025-07-31",
+        "fechaFin": "2025-08-31",
+        "diasFacturados": 31,
+        "energiaConsumida": 765,
+        "annual_consumption": 9007.26,
+        "precioTotal": 170.06,
+        "costeServicio": 7.02,
+        "bonoSocial": 0.4,
+        "precioContador": 0.02677,
+        "potenciaDemandadaP1": 5.17,
+        "potenciaDemandadaP2": 3.89,
+        "consumoP1": 170.28,
+        "consumoP2": 200.67,
+        "consumoP3": 394.04,
+        "potenciaContratadaP1": 4.6,
+        "potenciaContratadaP2": 4.6,
+        "taxesCosts": {
+          "electricTaxCost": 0,
+          "electricIeBase": 0,
+          "ivaCostGeneral": 0,
+          "ivaCostBase": 0,
+          "ivaCostReduced": 0
+        },
+        "iePercentage": 5.1127,
+        "preciosPotencia": [
+          {
+            "power_price": 0.139089,
+            "duration": 31,
+            "power_line": null,
+            "power_supplied": 4.6,
+            "type": "P1",
+            "discount": 0,
+            "start_date": null,
+            "end_date": null,
+            "iva": 21,
+            "total_cost": 19.83
+          }
+        ],
+        "preciosEnergia": [
+          {
+            "usage_price": 0.138594,
+            "energy_amount": 765,
+            "time_discrimination_type": "P1",
+            "original_value": "765 kWh x 0,138594 €/kWh 106,02 €",
+            "total_cost": 106.02,
+            "discount": 0,
+            "start_date": null,
+            "end_date": null,
+            "completed": false,
+            "y_coord": null,
+            "iva": 21
+          }
+        ],
+        "iva": 21,
+        "avg_energy_prices": {
+          "avg_energy_price_p1": "0.138594",
+          "avg_energy_price_p2": "0.0",
+          "avg_energy_price_p3": "0.0"
+        },
+        "avg_power_prices": {
+          "average_power_price": "0.139089",
+          "avg_power_price_p1": "0.139089",
+          "avg_power_price_p2": "0.0"
+        }
+      },
+      "informacionComparativa": {
+        "savings_status": "HAS_POSITIVE_SAVINGS",
+        "electric_information": {
+          "total_cost": 170.06,
+          "recalculated_total_cost": 170.07,
+          "energy_cost": 106.02,
+          "power_cost": 19.83,
+          "energy_power_adjustment": 0,
+          "coste_tope_gas": 0,
+          "discount_cost": 0,
+          "discount_energy_cost": 0,
+          "discount_power_cost": 0,
+          "self_consumption_cost": 0,
+          "self_consumption_accum_cost": 0,
+          "self_consumption_accum_cost_used": 0,
+          "electric_meter_cost": 0.83,
+          "service_cost": 7.02,
+          "company_fee": 0,
+          "other_cost_luz": 0,
+          "bono_social": 0.4,
+          "ie_base_cost": 126.25,
+          "electric_tax_cost": 6.46,
+          "tax_base": 133.54,
+          "tax_base_others": 7.02,
+          "iva_cost": 29.51,
+          "other_cost": 0,
+          "additional_cost_iva": 0,
+          "billing_concepts": []
+        },
+        "saving_calculations": [
+          {
+            "id": 49508,
+            "rate_plan_id": 598,
+            "plan_code": "EJEMPLO_2.0TD_3TE",
+            "plan_name": "EJEMPLO_2.0TD_3TE",
+            "rate_plan": {
+              "plan_urls": {
+                "contract": {},
+                "info": {}
+              }
+            },
+            "provider_id": 79,
+            "provider_name": "Iberdrola",
+            "provider_code": "WFYC_IBE",
+            "invoice_savings": 26.54,
+            "yearly_savings": 312.49,
+            "gas_cost_cap": 0,
+            "energy_cost": 101.62,
+            "energy_savings": 4.4,
+            "has_energy_savings": true,
+            "power_cost": 10.44,
+            "power_savings": 9.39,
+            "has_power_savings": true,
+            "bono_social": 0,
+            "total_amount": 143.53,
+            "discount_cost": 0,
+            "service_cost": 0,
+            "electric_meter_cost": 0.83,
+            "ie_cost": 5.73,
+            "iva_cost": 24.91,
+            "self_consumption_cost": 0,
+            "energy_price_p1": 0.13309,
+            "energy_price_p2": 0.150654,
+            "energy_price_p3": 0.123669,
+            "is_indexed_price": false,
+            "electronic_bill": false,
+            "commission": 0,
+            "services": [],
+            "electric_price_information": {
+              "id": 1163,
+              "energyPrices": {
+                "energy_price_p1": 0.13309,
+                "energy_price_p2": 0.150654,
+                "energy_price_p3": 0.123669
+              },
+              "powerPrices": {
+                "power_price_p1": 0.069543,
+                "power_price_p2": 0.003679
+              },
+              "discounts": {},
+              "indexedPrices": {},
+              "dh_type": "yes-3te-2tp"
+            }
+          },
+          {
+            "id": 49507,
+            "rate_plan_id": 597,
+            "plan_code": "EJEMPLO_2.0TD_1TE",
+            "plan_name": "EJEMPLO_2.0TD_1TE",
+            "rate_plan": {
+              "plan_urls": {
+                "contract": {},
+                "info": {}
+              }
+            },
+            "provider_id": 119,
+            "provider_name": "Fenie",
+            "provider_code": "WFYC_FIE",
+            "invoice_savings": -2.65,
+            "yearly_savings": -31.2,
+            "gas_cost_cap": 0,
+            "energy_cost": 114.59,
+            "energy_savings": -8.57,
+            "has_energy_savings": false,
+            "power_cost": 20.42,
+            "power_savings": -0.59,
+            "has_power_savings": false,
+            "bono_social": 0,
+            "total_amount": 172.72,
+            "discount_cost": 0,
+            "service_cost": 0,
+            "electric_meter_cost": 0.83,
+            "ie_cost": 6.9,
+            "iva_cost": 29.98,
+            "self_consumption_cost": 0,
+            "energy_price_p1": 0.149794,
+            "energy_price_p2": 0,
+            "energy_price_p3": 0,
+            "is_indexed_price": false,
+            "electronic_bill": false,
+            "commission": 0,
+            "services": [],
+            "electric_price_information": {
+              "id": 1162,
+              "energyPrices": {
+                "energy_price_p1": 0.149794
+              },
+              "powerPrices": {
+                "power_price_p1": 0.139543,
+                "power_price_p2": 0.003679
+              },
+              "discounts": {},
+              "indexedPrices": {},
+              "dh_type": "yes-1te-2tp"
+            }
+          }
+        ]
+      },
+      "tokenBL": "S0JqUnNBZVZJcW5kS0VwaGpObUgtLTRpMmh0MzhWY3pqN1NPRGctLUt0Qld3bjV6ckNlUFdGKzFYb3NEQ0E9PQ=="
+    }
+  }

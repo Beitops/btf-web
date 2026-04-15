@@ -1,0 +1,105 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/HeaderLanding.astro";
+import Hero from "../components/Hero.astro";
+import LogosCarrousel from "../components/LogosCarrousel.astro";
+import SectionImage from "../components/SectionImage.astro";
+import Banner from "../components/Banner.astro";
+import FAQs from "../components/FAQs.astro";
+import Footer from "../components/Footer.astro";
+import Sergio_btf from "../assets/sections/Sergio_btf.png";
+import Section2 from "../assets/sections/Section2.png";
+import FacturinBanner2 from "../assets/facturin/FacturinBanner2.png";
+import { getPromocionBySlug } from "../lib/promociones";
+
+const promocion = await getPromocionBySlug('feria-sevilla-2026');
+
+const faqs = [
+	{
+		question: "¿Estoy pagando de más en la luz?",
+		answer: "En la mayoría de hogares, sí. Las tarifas cambian a los 12 meses en todas las compañías, los precios suben y bajan y casi nadie revisa su factura con frecuencia. Subiendo tu factura te lo decimos en segundos, sin llamadas ni compromisos."
+	},
+	{
+		question: "¿Por qué necesito subir mi factura?",
+		answer: "Porque cada hogar consume distinto. Sin tu factura solo podríamos darte estimaciones. Con ella, el análisis es real, personalizado y exacto."
+	},
+	{
+		question: "¿Cuánto cuesta usar BajaTuFactura?",
+		answer: "Nada. El servicio es 100% gratuito para ti. Nuestro objetivo es que pagues menos, no que pagues más."
+	},
+	{
+		question: "¿Hay permanencia o penalizaciones?",
+		answer: "No. Puedes irte cuando quieras y cambiar de tarifa siempre que lo necesites."
+	},
+	{
+		question: "¿Puedo cambiar de tarifa de luz sin cortar el suministro?",
+		answer: "Sí. El cambio de tarifa de luz es un trámite administrativo. No hay cortes de luz, no se realizan obras y no se cambia el contador."
+	}
+];
+---
+
+<Layout>
+	<Header />
+
+	<main class="bg-body">
+		<div id="hero">
+			<Hero
+				title='Compara y baja tu factura de<br/>luz <span class="font-normal italic">sin llamadas.</span>'
+				subtitle='Arrastra tu factura y comprueba si estás pagando<br/>lo justo de forma totalmente gratuita.'
+				promocion={promocion}
+			/>
+		</div>
+	</main>
+
+	<LogosCarrousel />
+
+	<SectionImage imagePosition="left" imageSrc={Sergio_btf} imageAlt="Compara y baja tu factura de la luz">
+		<h2 class="text-3xl md:text-4xl leading-tight mb-4 text-center md:text-left">
+			Analizamos tu factura y te conseguimos la <span class="font-bold">mejor tarifa de luz</span>
+		</h2>
+		<p class="text-lg mt-6 text-gray-700 max-w-lg text-center md:text-left font-family-secondary font-light">
+			En Baja Tu Factura analizamos <span class="font-bold">tu factura de luz</span> real, no
+			estimaciones ni datos genéricos. Solo tienes que arrastrarla y nuestro sistema estudia tu consumo
+			para encontrar <span class="font-bold">la mejor oferta</span> de luz adaptada a tu caso concreto,
+			sin comparaciones genéricas ni letra pequeña.
+		</p>
+		<p class="text-lg mt-6 text-gray-700 max-w-lg text-center md:text-left font-family-secondary font-light">
+			Nuestro objetivo es sencillo, que puedas <span class="font-bold">bajar tu factura</span> desde el
+			primer momento, sin llamadas interminables ni procesos complicados. Nosotros hacemos el trabajo
+			por ti para que tú solo veas el resultado.
+		</p>
+	</SectionImage>
+
+	<Banner
+		imageClass="absolute bottom-0 inset-x-10 mx-auto -right-20 lg:rigth-auto lg:left-1/2 w-auto h-50 lg:h-65"
+		title='Pagar lo justo en tu factura de luz, nunca fue tan <span style="color: #00bf63">fácil</span>'
+	/>
+
+	<SectionImage imagePosition="right" imageSrc={Section2} imageAlt="Compara y baja tu factura de la luz">
+		<h2 class="text-3xl md:text-4xl leading-tight mb-4 text-center md:text-left">
+			Somos tu aliado para reducir tu <span class="font-bold">factura de luz</span> a largo plazo
+		</h2>
+		<p class="text-lg mt-6 text-gray-700 max-w-lg text-center md:text-left font-family-secondary font-light">
+			Pero ahorrar una vez no es suficiente. En <span class="font-bold">Baja Tu Factura</span> trabajamos
+			contigo a largo plazo, vigilando de forma constante los precios de la luz y analizando el mercado
+			en busca de nuevas <span class="font-bold">oportunidades de ahorro</span>.
+		</p>
+		<p class="text-lg mt-6 text-gray-700 max-w-lg text-center md:text-left font-family-secondary font-light">
+			Cada vez que aparece una <span class="font-bold">oferta de luz</span> mejor para tu perfil de
+			consumo, te avisamos para que puedas cambiar y seguir pagando lo mínimo posible, sin tener que
+			preocuparte por subidas, renovaciones o cambios en tu contrato. Así te aseguras de que tu
+			<span class="font-bold">factura de luz</span> esté siempre optimizada, hoy y mañana.
+		</p>
+	</SectionImage>
+
+	<Banner
+		textPosition="right"
+		imageSrc={FacturinBanner2}
+		imageClass="absolute bottom-0 inset-x-10 mx-auto -left-5 lg:left-20 lg:right-[35%] w-auto h-50 lg:h-65"
+		title='Despreocúpate de tu factura y pon el ahorro en <span style="color: #00bf63">automático.</span>'
+	/>
+
+	<FAQs faqs={faqs} />
+
+	<Footer />
+</Layout>

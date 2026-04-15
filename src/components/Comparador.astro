@@ -1,0 +1,56 @@
+---
+import OptimizedImage from "./OptimizedImage.astro";
+import facturinSimple from "../assets/facturin/facturin_simple.png";
+import ReactInit from "./ReactInit";
+import type { Promocion } from "../lib/promociones";
+
+interface Props {
+  promocion?: Promocion | null;
+  utmSource?: string;
+  utmMedium?: string;
+  utmCampaign?: string;
+}
+
+const { promocion, utmSource, utmMedium, utmCampaign } = Astro.props;
+---
+<ReactInit client:only="react" />
+
+<div
+	id="dropzone"
+	class="bg-white rounded-[50px] border relative border-black py-12 md:py-16 px-8 md:px-16 cursor-pointer shadow-xl transition-all hover:border-gray-300 hover:shadow-lg"
+	data-promocion={promocion ? JSON.stringify(promocion) : null}
+	data-utm-source={utmSource ?? null}
+	data-utm-medium={utmMedium ?? null}
+	data-utm-campaign={utmCampaign ?? null}
+>
+	<div class="mb-12 flex flex-col md:flex-row items-center justify-center gap-6 md:gap-8">
+		<div class="order-2 flex justify-end flex-1 md:order-1 shrink-0">
+			<OptimizedImage
+				src={facturinSimple}
+				alt="Factura"
+				width={192}
+				class="w-20 h-auto"
+				loading="eager"
+			/>
+		</div>
+		<div class="order-1 md:order-2 flex flex-2 flex-col items-start text-center md:text-left">
+			<p id="dropzone-text" class="text-black text-2xl md:text-4xl font-bold max-w-sm">Arrastra o sube tu factura <span class="text-black underline underline-offset-2" style="text-decoration-color: var(--color-primary); text-decoration-thickness: 3px;">aquí</span></p>
+			<input 
+				type="file" 
+				id="file-input" 
+				accept=".pdf" 
+				class="hidden"
+			/>
+		</div>
+
+	</div>
+	<p class="text-sm text-center md:absolute md:bottom-4 md:right-5 md:left-5" style="color: var(--color-gris-light)">
+		🔒 Los datos de tu factura están totalmente protegidos y solo serán utilizados para encontrar una tarifa más económica según tu consumo y precios.
+	</p>
+</div>
+
+<div id="comparador-modal-root" aria-hidden="true"></div>
+
+<script>
+	import '../utils/comparadorDropzone';
+</script>
