@@ -51,6 +51,20 @@ export interface SavingCalculation {
 	power_cost?: number;
 	discount_cost?: number;
 	service_cost?: number;
+	energy_price_p1?: number;
+	energy_price_p2?: number;
+	energy_price_p3?: number;
+	electric_price_information?: {
+		powerPrices?: {
+			power_price_p1?: number;
+			power_price_p2?: number;
+			power_price_p3?: number;
+		};
+		energyPrices?: {
+			energy_price_p1?: number;
+			energy_price_p2?: number;
+		};
+	};
 	[key: string]: unknown;
 }
 

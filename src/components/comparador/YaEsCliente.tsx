@@ -2,7 +2,14 @@ import React, { type FC } from 'react';
 
 const WHATSAPP_LINK = 'https://wa.link/cgm2ip';
 
-const YaEsCliente: FC = () => {
+interface YaEsClienteProps {
+	direccion?: string | null;
+	comerc?: string | null;
+}
+
+const YaEsCliente: FC<YaEsClienteProps> = ({ direccion, comerc }) => {
+	const tieneInfo = direccion || comerc;
+
 	return (
 		<div className="flex flex-1 flex-col">
 			<div className="mx-auto w-full max-w-3xl">
@@ -14,17 +21,48 @@ const YaEsCliente: FC = () => {
 						}}
 					>
 						<p className="text-5xl md:text-6xl" aria-hidden>
-							😉
+							👋
 						</p>
-						<p
-							className="text-xl font-semibold leading-relaxed text-gray-900 md:text-2xl md:leading-relaxed"
-							style={{ fontFamily: "var(--font-primary, 'Poppins', sans-serif)" }}
-						>
-							Hemos visto que tu suministro ya forma parte de la familia de BajaTuFactura.
-						</p>
-						<p className="text-xl leading-relaxed text-gray-700 md:text-2xl md:leading-relaxed">
-							Si quieres que hagamos una doble revisión de tu factura escríbenos por WhatsApp.
-						</p>
+
+						{tieneInfo ? (
+							<>
+								<p
+									className="text-xl font-semibold leading-relaxed text-gray-900 md:text-2xl md:leading-relaxed"
+									style={{ fontFamily: "var(--font-primary, 'Poppins', sans-serif)" }}
+								>
+									Vaya, hemos visto que ya tienes de alta
+									{direccion && (
+										<>
+											{' '}la dirección{' '}
+											<span className="text-[#00bf63]">{direccion}</span>
+										</>
+									)}
+									{comerc && (
+										<>
+											{' '}con la compañía{' '}
+											<span className="text-[#00bf63]">{comerc}</span>
+										</>
+									)}
+									.
+								</p>
+								<p className="text-base leading-relaxed text-gray-700 md:text-xl md:leading-relaxed">
+									Si quieres que te revisemos otro suministro, contáctanos vía WhatsApp.
+								</p>
+							</>
+						) : (
+							<>
+								<p
+									className="text-xl font-semibold leading-relaxed text-gray-900 md:text-2xl md:leading-relaxed"
+									style={{ fontFamily: "var(--font-primary, 'Poppins', sans-serif)" }}
+								>
+									Hemos visto que tu suministro ya forma parte de la familia de BajaTuFactura.
+								</p>
+								<p className="text-xl leading-relaxed text-gray-700 md:text-2xl md:leading-relaxed">
+									Si quieres que hagamos una doble revisión de tu factura escríbenos por WhatsApp.
+								</p>
+							</>
+						)}
+
 						<a
 							href={WHATSAPP_LINK}
 							target="_blank"
@@ -35,7 +73,7 @@ const YaEsCliente: FC = () => {
 							}}
 						>
 							<svg
-								className="h-12 w-12 md:h-6 md:w-6"
+								className="h-6 w-6"
 								fill="currentColor"
 								viewBox="0 0 24 24"
 								aria-hidden

@@ -33,6 +33,8 @@ if (Astro.request.method === 'POST') {
       nombre: String(body.get('nombre')),
       descripcion: body.get('descripcion') ? String(body.get('descripcion')) : null,
       regalo: body.get('regalo') ? String(body.get('regalo')) : null,
+      frase: body.get('frase') ? String(body.get('frase')) : null,
+      mensaje_final: body.get('mensaje_final') ? String(body.get('mensaje_final')) : null,
       activa: body.get('activa') === 'on',
       fecha_inicio: body.get('fecha_inicio') ? String(body.get('fecha_inicio')) : null,
       fecha_fin: body.get('fecha_fin') ? String(body.get('fecha_fin')) : null,
@@ -50,6 +52,8 @@ if (Astro.request.method === 'POST') {
       nombre: String(body.get('nombre')),
       descripcion: body.get('descripcion') ? String(body.get('descripcion')) : null,
       regalo: body.get('regalo') ? String(body.get('regalo')) : null,
+      frase: body.get('frase') ? String(body.get('frase')) : null,
+      mensaje_final: body.get('mensaje_final') ? String(body.get('mensaje_final')) : null,
       activa: body.get('activa') === 'on',
       fecha_inicio: body.get('fecha_inicio') ? String(body.get('fecha_inicio')) : null,
       fecha_fin: body.get('fecha_fin') ? String(body.get('fecha_fin')) : null,
@@ -192,6 +196,14 @@ function fmtDatetimeLocal(d: string | null) {
               <label>Regalo</label>
               <input type="text" name="regalo" placeholder="50€ de regalo" />
             </div>
+            <div class="full">
+              <label>Frase <span style="color:#444;font-weight:400">(aparece en el hero)</span></label>
+              <input type="text" name="frase" placeholder="¡Aprovecha esta oferta exclusiva!" />
+            </div>
+            <div class="full">
+              <label>Mensaje final contratación <span style="color:#444;font-weight:400">(aparece en el paso 3 del wizard)</span></label>
+              <input type="text" name="mensaje_final" placeholder="¡Estás a punto de empezar a ahorrar!" />
+            </div>
             <div>
               <label>utm_campaign * <span style="color:#444;font-weight:400">(identificador)</span></label>
               <input type="text" name="utm_campaign" placeholder="feria_sevilla" required pattern="[a-z0-9_\-]+" title="Solo minúsculas, números, guiones" />
@@ -325,6 +337,14 @@ function fmtDatetimeLocal(d: string | null) {
           <label>Regalo</label>
           <input type="text" name="regalo" id="edit-regalo" />
         </div>
+        <div class="full">
+          <label>Frase <span style="color:#444;font-weight:400">(aparece en el hero)</span></label>
+          <input type="text" name="frase" id="edit-frase" />
+        </div>
+        <div class="full">
+          <label>Mensaje final contratación <span style="color:#444;font-weight:400">(aparece en el paso 3 del wizard)</span></label>
+          <input type="text" name="mensaje_final" id="edit-mensaje-final" />
+        </div>
         <div>
           <label>utm_campaign *</label>
           <input type="text" name="utm_campaign" id="edit-campaign" required pattern="[a-z0-9_\-]+" />
@@ -362,12 +382,14 @@ function fmtDatetimeLocal(d: string | null) {
   </div>
 </div>
 
-<script>
+<script is:inline>
   function openEditModal(jsonStr) {
     const p = JSON.parse(jsonStr);
     document.getElementById('edit-id').value = p.id;
     document.getElementById('edit-nombre').value = p.nombre ?? '';
     document.getElementById('edit-regalo').value = p.regalo ?? '';
+    document.getElementById('edit-frase').value = p.frase ?? '';
+    document.getElementById('edit-mensaje-final').value = p.mensaje_final ?? '';
     document.getElementById('edit-campaign').value = p.slug ?? '';
     document.getElementById('edit-source').value = p.utm_source ?? '';
     document.getElementById('edit-medium').value = p.utm_medium ?? '';

@@ -1,6 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
+import HeaderLanding from "../components/HeaderLanding.astro";
 import Hero from "../components/Hero.astro";
 import LogosCarrousel from "../components/LogosCarrousel.astro";
 import SectionImage from "../components/SectionImage.astro";
@@ -10,6 +11,14 @@ import Footer from "../components/Footer.astro";
 import Sergio_btf from "../assets/sections/Sergio_btf.png";
 import Section2 from "../assets/sections/Section2.png";
 import FacturinBanner2 from "../assets/facturin/FacturinBanner2.png";
+import { getPromocionActiva } from "../lib/promociones";
+
+const promocion = await getPromocionActiva();
+
+const utmSource   = Astro.url.searchParams.get('utm_source') ?? '';
+const utmMedium   = Astro.url.searchParams.get('utm_medium') ?? '';
+const utmCampaign = Astro.url.searchParams.get('utm_campaign') ?? '';
+const esLanding = !!(utmSource || utmMedium || utmCampaign);
 
 const faqs = [
 	{
@@ -36,13 +45,17 @@ const faqs = [
 ---
 
 <Layout>
-	<Header />
+	{esLanding ? <HeaderLanding /> : <Header />}
 
 	<main class="bg-body">
 		<div id="hero">
-			<Hero 
+			<Hero
 				title='Compara y baja tu factura de<br/>luz <span class="font-normal italic">sin llamadas.</span>'
-				subtitle='Arrastra tu factura y comprueba si estás pagando<br/>lo justo de forma totalmente gratuita.'
+				subtitle='Sube tu factura y comprueba si estás pagando<br/>lo justo de forma totalmente gratuita.'
+				promocion={promocion}
+				utmSource={utmSource}
+				utmMedium={utmMedium}
+				utmCampaign={utmCampaign}
 			/>
 		</div>
 	</main>

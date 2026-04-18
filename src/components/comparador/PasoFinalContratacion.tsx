@@ -1,5 +1,6 @@
-import React, { type FC } from 'react';
+import React, { useState, type FC } from 'react';
 import ProgresoContratacion from './ProgresoContratacion';
+import type { SavingCalculation } from '../../types/factura';
 
 export interface DireccionFacturacionData {
 	calle: string;
@@ -20,6 +21,8 @@ interface PasoFinalContratacionProps {
 	data: FinalContratacionFormData;
 	ahorroAnual: string;
 	companiaElegida: string;
+	saving?: SavingCalculation | null;
+	mensajeFinal?: string | null;
 	onBack: () => void;
 	onIbanChange: (value: string) => void;
 	onDireccionFacturacionDiferenteChange: (checked: boolean) => void;
@@ -33,31 +36,81 @@ interface PasoFinalContratacionProps {
 const inputBaseClassName =
 	'w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-gray-900 placeholder:text-gray-400 focus:border-[#00bf63] focus:outline-none focus:ring-2 focus:ring-[#00bf63]/20';
 
+const inputErrorClassName =
+	'w-full rounded-xl border border-red-400 bg-white px-4 py-2 text-gray-900 placeholder:text-gray-400 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-400/20';
+
+function validateIBAN(raw: string): boolean {
+	const clean = raw.replace(/\s+/g, '').toUpperCase();
+	if (!/^ES\d{22}$/.test(clean)) return false;
+	const rearranged = clean.slice(4) + clean.slice(0, 4);
+	const numeric = rearranged.replace(/[A-Z]/g, (c) => String(c.charCodeAt(0) - 55));
+	let remainder = 0;
+	for (const char of numeric) {
+		remainder = (remainder * 10 + parseInt(char, 10)) % 97;
+	}
+	return remainder === 1;
+}
+
+function formatIBAN(raw: string): string {
+	const clean = raw.replace(/\s+/g, '').toUpperCase();
+	return clean.match(/.{1,4}/g)?.join(' ') ?? clean;
+}
+
+const euro = (v?: number) =>
+	v != null ? v.toFixed(2).replace('.', ',') : '—';
+
 const PasoFinalContratacion: FC<PasoFinalContratacionProps> = ({
 	data,
 	ahorroAnual,
 	companiaElegida,
+	saving,
+	mensajeFinal,
 	onBack,
 	onIbanChange,
 	onDireccionFacturacionDiferenteChange,
 	onDireccionFacturacionFieldChange,
 	onSubmit,
 }) => {
+	const [ibanError, setIbanError] = useState<string | null>(null);
+	const [detallesAbiertos, setDetallesAbiertos] = useState(false);
+
+	function handleIbanChange(value: string) {
+		const formatted = formatIBAN(value);
+		onIbanChange(formatted);
+		if (ibanError) {
+			// Limpiar error mientras escribe
+			setIbanError(null);
+		}
+	}
+
+	function handleIbanBlur() {
+		const raw = data.iban.replace(/\s+/g, '');
+		if (!raw) return;
+		if (!validateIBAN(raw)) {
+			setIbanError('El IBAN no es válido. Debe ser un IBAN español con formato ES + 22 dígitos.');
+		} else {
+			setIbanError(null);
+		}
+	}
+
+	function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+		event.preventDefault();
+		const form = event.currentTarget;
+		if (!form.checkValidity()) {
+			form.reportValidity();
+			return;
+		}
+		if (!validateIBAN(data.iban.replace(/\s+/g, ''))) {
+			setIbanError('El IBAN no es válido. Debe ser un IBAN español con formato ES + 22 dígitos.');
+			return;
+		}
+		onSubmit();
+	}
+
 	return (
 		<div className="mx-auto w-full max-w-3xl">
 			<div className="rounded-3xl border border-gray-100 bg-white p-4 shadow-sm md:p-6">
-				<form
-					className="space-y-4"
-					onSubmit={(event) => {
-						event.preventDefault();
-						const form = event.currentTarget;
-						if (!form.checkValidity()) {
-							form.reportValidity();
-							return;
-						}
-						onSubmit();
-					}}
-				>
+				<form className="space-y-4" onSubmit={handleSubmit}>
 					<div className="space-y-3">
 						<ProgresoContratacion currentStep={3} />
 						<div className="text-center">
@@ -78,11 +131,19 @@ const PasoFinalContratacion: FC<PasoFinalContratacionProps> = ({
 								name="iban"
 								type="text"
 								required
-								className={inputBaseClassName}
+								inputMode="numeric"
+								maxLength={29}
+								className={ibanError ? inputErrorClassName : inputBaseClassName}
 								value={data.iban}
-								onChange={(event) => onIbanChange(event.target.value)}
+								onChange={(event) => handleIbanChange(event.target.value)}
+								onBlur={handleIbanBlur}
 								placeholder="ES00 0000 0000 0000 0000 0000"
 							/>
+							{ibanError && (
+								<p className="mt-1 text-xs text-red-500" style={{ fontFamily: "var(--font-family-secondary, 'Montserrat', sans-serif)" }}>
+									{ibanError}
+								</p>
+							)}
 						</div>
 
 						<label className="flex cursor-pointer items-start gap-3 rounded-xl border border-gray-200 px-4 py-3 transition-colors hover:border-[#00bf63]/40">
@@ -225,19 +286,86 @@ const PasoFinalContratacion: FC<PasoFinalContratacionProps> = ({
 						)}
 					</div>
 
+					{/* Resumen de contratación */}
 					<div className="rounded-2xl border border-[#00bf63]/20 bg-[#00bf63]/5 p-5 md:p-6">
-						<p className="text-sm font-medium uppercase tracking-wide text-[#00a458]">
-							Resumen de tu contratación
-						</p>
-						<div className="mt-3 space-y-2">
-							<p className="text-base text-gray-700 md:text-lg">
-								Compañía elegida:{' '}
-								<span className="font-semibold text-gray-900">{companiaElegida}</span>
-							</p>
-							<p className="text-base text-gray-700 md:text-lg">
-								Ahorro estimado anual:{' '}
-								<span className="font-bold text-[#00a458]">{ahorroAnual}</span>
-							</p>
+						<div className={`grid gap-4 items-start ${mensajeFinal ? 'md:grid-cols-2' : 'grid-cols-1'}`}>
+							{/* Columna izquierda: datos de la oferta */}
+							<div className="space-y-2">
+								<p className="text-sm font-medium uppercase tracking-wide text-[#00a458] mb-3">
+									Resumen de tu contratación
+								</p>
+								<p className="text-base text-gray-700 md:text-lg">
+									Compañía elegida:{' '}
+									<span className="font-semibold text-gray-900">{companiaElegida}</span>
+								</p>
+								{saving?.plan_name && (
+									<p className="text-base text-gray-700 md:text-lg">
+										Tarifa:{' '}
+										<span className="font-semibold text-gray-900">{saving.plan_name}</span>
+									</p>
+								)}
+								<p className="text-base text-gray-700 md:text-lg">
+									Ahorro estimado anual:{' '}
+									<span className="font-bold text-[#00a458]">{ahorroAnual}</span>
+								</p>
+
+								{/* Más detalles */}
+								<button
+									type="button"
+									onClick={() => setDetallesAbiertos((v) => !v)}
+									className="mt-2 flex items-center gap-1 text-sm font-semibold text-[#00a458] hover:underline focus:outline-none"
+									style={{ fontFamily: "var(--font-family-secondary, 'Montserrat', sans-serif)" }}
+								>
+									{detallesAbiertos ? '▲' : '▼'} Más detalles
+								</button>
+
+								{detallesAbiertos && (
+									<div className="space-y-2 border-t border-[#00bf63]/20 pt-3">
+										<div className="flex items-center justify-between text-sm text-gray-700">
+											<span>Precio energía</span>
+											<span className="font-semibold text-gray-900">
+												{saving?.energy_price_p1 != null
+													? `${saving.energy_price_p1.toLocaleString('es-ES', { minimumFractionDigits: 4, maximumFractionDigits: 6 })} €/kWh`
+													: '—'}
+											</span>
+										</div>
+										<div className="flex items-center justify-between text-sm text-gray-700">
+											<span>Precio potencia punta</span>
+											<span className="font-semibold text-gray-900">
+												{saving?.electric_price_information?.powerPrices?.power_price_p1 != null
+													? `${saving.electric_price_information.powerPrices.power_price_p1.toLocaleString('es-ES', { minimumFractionDigits: 4, maximumFractionDigits: 6 })} €/kW día`
+													: '—'}
+											</span>
+										</div>
+										<div className="flex items-center justify-between text-sm text-gray-700">
+											<span>Precio potencia valle</span>
+											<span className="font-semibold text-gray-900">
+												{saving?.electric_price_information?.powerPrices?.power_price_p2 != null
+													? `${saving.electric_price_information.powerPrices.power_price_p2.toLocaleString('es-ES', { minimumFractionDigits: 4, maximumFractionDigits: 6 })} €/kW día`
+													: '—'}
+											</span>
+										</div>
+										<div className="flex items-center justify-between text-sm text-gray-700">
+											<span>Permanencia</span>
+											<span className="font-semibold text-gray-900">Sin permanencia</span>
+										</div>
+										<div className="flex items-center justify-between text-sm text-gray-700">
+											<span>Tipo de tarifa</span>
+											<span className="font-semibold text-gray-900">Tarifa fija 24 horas</span>
+										</div>
+									</div>
+								)}
+							</div>
+
+							{/* Columna derecha: condiciones de la promoción */}
+							{mensajeFinal && (
+								<div className="self-start rounded-xl border border-[#00bf63]/30 bg-white p-4">
+									<p className="mb-2 text-xs font-bold uppercase tracking-widest text-[#00a458]">
+										Condiciones de la promoción
+									</p>
+									<p className="text-sm font-semibold text-gray-900">{mensajeFinal}</p>
+								</div>
+							)}
 						</div>
 					</div>
 

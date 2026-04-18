@@ -14,8 +14,22 @@ function initComparadorDropzone() {
 	const utmCampaign = dropzone.getAttribute('data-utm-campaign') ?? '';
 	const container = document.getElementById('comparador-modal-root');
 
+	const errorEl = document.getElementById('dropzone-error');
+
 	function resetFileInput() {
 		if (fileInput instanceof HTMLInputElement) fileInput.value = '';
+	}
+
+	function showFileError(msg: string) {
+		if (errorEl) {
+			errorEl.textContent = msg;
+			errorEl.classList.remove('hidden');
+			setTimeout(() => errorEl.classList.add('hidden'), 5000);
+		}
+	}
+
+	function isPdf(file: File): boolean {
+		return file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
 	}
 
 	async function openDashboard(data: { file?: File; nombre: string; telefono: string }) {
@@ -69,7 +83,13 @@ function initComparadorDropzone() {
 	fileInput.addEventListener('change', (e) => {
 		const target = e.target;
 		if (target instanceof HTMLInputElement && target.files && target.files.length > 0) {
-			handleFile(target.files[0]);
+			const file = target.files[0];
+			if (!isPdf(file)) {
+				showFileError('Formato no admitido. Por favor, sube un archivo PDF.');
+				resetFileInput();
+				return;
+			}
+			handleFile(file);
 		}
 	});
 
@@ -94,11 +114,11 @@ function initComparadorDropzone() {
 		const files = e.dataTransfer?.files;
 		if (files && files.length > 0) {
 			const file = files[0];
-			if (file.type === 'application/pdf' || file.type.startsWith('image/')) {
-				handleFile(file);
-			} else {
-				alert('Por favor, sube un archivo PDF o una imagen.');
+			if (!isPdf(file)) {
+				showFileError('Formato no admitido. Por favor, sube un archivo PDF.');
+				return;
 			}
+			handleFile(file);
 		}
 	});
 

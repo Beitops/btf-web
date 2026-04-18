@@ -1,4 +1,4 @@
-import React, { type FC } from 'react';
+import React, { useState, useEffect, type FC } from 'react';
 import ProgresoContratacion from './ProgresoContratacion';
 
 export interface SuministroGestionFormData {
@@ -25,8 +25,8 @@ interface PasoSuministroGestionProps {
 const inputBaseClassName =
 	'w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-gray-900 placeholder:text-gray-400 focus:border-[#00bf63] focus:outline-none focus:ring-2 focus:ring-[#00bf63]/20';
 
-const radioBaseClassName =
-	'h-4 w-4 border-gray-300 text-[#00bf63] focus:ring-[#00bf63]/30';
+const inputDisabledClassName =
+	'w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 text-gray-500 cursor-not-allowed select-none';
 
 const PasoSuministroGestion: FC<PasoSuministroGestionProps> = ({
 	data,
@@ -34,8 +34,43 @@ const PasoSuministroGestion: FC<PasoSuministroGestionProps> = ({
 	onBack,
 	onSubmit,
 }) => {
+	const [showPopup, setShowPopup] = useState(true);
+
+	useEffect(() => {
+		setShowPopup(true);
+	}, []);
+
 	return (
 		<div className="mx-auto w-full max-w-3xl">
+			{/* Popup informativo */}
+			{showPopup && (
+				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+					<div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl text-center">
+						<div className="mb-3 text-3xl">📋</div>
+						<h4
+							className="mb-2 text-lg font-bold text-gray-900"
+							style={{ fontFamily: "var(--font-primary, 'Poppins', sans-serif)" }}
+						>
+							Revisa tus datos
+						</h4>
+						<p
+							className="mb-5 text-sm text-gray-600"
+							style={{ fontFamily: "var(--font-family-secondary, 'Montserrat', sans-serif)" }}
+						>
+							Los datos obtenidos son de la factura subida, revisa los datos por si quieres modificar.
+						</p>
+						<button
+							type="button"
+							onClick={() => setShowPopup(false)}
+							className="rounded-full bg-[#00bf63] px-8 py-3 text-sm font-bold text-white shadow-lg shadow-[#00bf63]/25 transition-all hover:brightness-110 focus:outline-none focus:ring-4 focus:ring-[#00bf63]/30"
+							style={{ fontFamily: "var(--font-primary, 'Poppins', sans-serif)" }}
+						>
+							Entendido
+						</button>
+					</div>
+				</div>
+			)}
+
 			<div className="rounded-3xl border border-gray-100 bg-white p-4 shadow-sm md:p-6">
 				<form
 					className="space-y-4"
@@ -172,10 +207,10 @@ const PasoSuministroGestion: FC<PasoSuministroGestionProps> = ({
 									name="cups"
 									type="text"
 									required
-									className={inputBaseClassName}
+									disabled
+									className={inputDisabledClassName}
 									value={data.cups}
-									onChange={(event) => onFieldChange('cups', event.target.value)}
-									placeholder="ES00..."
+									readOnly
 								/>
 							</div>
 							<div>
@@ -211,12 +246,10 @@ const PasoSuministroGestion: FC<PasoSuministroGestionProps> = ({
 									name="potenciaContratadap2"
 									type="text"
 									required
-									className={inputBaseClassName}
+									disabled
+									className={inputDisabledClassName}
 									value={data.potenciaContratadap2}
-									onChange={(event) =>
-										onFieldChange('potenciaContratadap2', event.target.value)
-									}
-									placeholder="0.0"
+									readOnly
 								/>
 							</div>
 							<div>
@@ -231,61 +264,13 @@ const PasoSuministroGestion: FC<PasoSuministroGestionProps> = ({
 									name="potenciaContratadap1"
 									type="text"
 									required
-									className={inputBaseClassName}
+									disabled
+									className={inputDisabledClassName}
 									value={data.potenciaContratadap1}
-									onChange={(event) =>
-										onFieldChange('potenciaContratadap1', event.target.value)
-									}
-									placeholder="0.0"
+									readOnly
 								/>
 							</div>
 						</div>
-					</div>
-
-					<div className="space-y-3 border-t border-gray-100 pt-4">
-						<div className="text-center">
-							<h3
-								className="text-xl font-bold text-gray-900 md:text-2xl"
-								style={{ fontFamily: "var(--font-primary, 'Poppins', sans-serif)" }}
-							>
-								Eleccion de gestion
-							</h3>
-						</div>
-
-						<fieldset>
-							<legend className="sr-only">Selecciona una opcion de gestion</legend>
-							<div className="space-y-4">
-								<label className="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 px-4 py-3 transition-colors hover:border-[#00bf63]/40">
-									<input
-										type="radio"
-										name="tipoGestion"
-										value="cambio_compania"
-										checked={data.tipoGestion === 'cambio_compania'}
-										onChange={(event) => onFieldChange('tipoGestion', event.target.value)}
-										className={radioBaseClassName}
-										required
-									/>
-									<span className="text-sm font-medium text-gray-800 md:text-base">
-										Cambio de compañia
-									</span>
-								</label>
-
-								<label className="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 px-4 py-3 transition-colors hover:border-[#00bf63]/40">
-									<input
-										type="radio"
-										name="tipoGestion"
-										value="cambio_titular"
-										checked={data.tipoGestion === 'cambio_titular'}
-										onChange={(event) => onFieldChange('tipoGestion', event.target.value)}
-										className={radioBaseClassName}
-										required
-									/>
-									<span className="text-sm font-medium text-gray-800 md:text-base">
-										Cambio de titular
-									</span>
-								</label>
-							</div>
-						</fieldset>
 					</div>
 
 					<div className="flex flex-col items-center justify-center gap-3 pt-2 sm:flex-row">

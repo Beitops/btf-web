@@ -185,11 +185,13 @@ const PasoDNI: FC<PasoDNIProps> = ({
 }) => {
 	const [validacionFrente, setValidacionFrente] = useState<ValidacionDni>({ estado: 'idle' });
 	const [validacionDorso, setValidacionDorso] = useState<ValidacionDni>({ estado: 'idle' });
+	const [aceptaDatos, setAceptaDatos] = useState(false);
 
 	const puedeEnviar =
 		data.frente !== null &&
 		data.dorso !== null &&
 		data.autorizado &&
+		aceptaDatos &&
 		validacionFrente.estado !== 'error' &&
 		validacionDorso.estado !== 'error' &&
 		validacionFrente.estado !== 'validando' &&
@@ -261,6 +263,23 @@ const PasoDNI: FC<PasoDNIProps> = ({
 							style={{ fontFamily: "var(--font-family-secondary, 'Montserrat', sans-serif)" }}
 						>
 							<span className="font-semibold text-gray-900">Declaro y confirmo</span> que soy la persona titular del suministro o cuento con autorización expresa para realizar este cambio de comercializadora en su nombre, y que los datos facilitados son verídicos. Entiendo que este consentimiento queda registrado como comprobante del proceso de contratación.
+						</span>
+					</label>
+
+					{/* Checkbox de protección de datos */}
+					<label className="flex cursor-pointer items-start gap-3 rounded-xl border border-gray-200 px-4 py-4 transition-colors hover:border-[#00bf63]/40">
+						<input
+							type="checkbox"
+							required
+							checked={aceptaDatos}
+							onChange={(e) => setAceptaDatos(e.target.checked)}
+							className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-[#00bf63] focus:ring-[#00bf63]/30"
+						/>
+						<span
+							className="text-sm text-gray-700 leading-snug"
+							style={{ fontFamily: "var(--font-family-secondary, 'Montserrat', sans-serif)" }}
+						>
+							Acepto que mis datos sean utilizados por <span className="font-semibold text-gray-900">Baja Tu Factura S.L.</span> para la realización del estudio energético y la gestión de la contratación de la tarifa de luz y/o gas seleccionada, incluyendo su cesión a las comercializadoras necesarias para dicha contratación.
 						</span>
 					</label>
 

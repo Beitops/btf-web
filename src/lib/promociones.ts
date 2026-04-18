@@ -12,6 +12,8 @@ export interface Promocion {
   creada_en: string;
   utm_source: string | null;
   utm_medium: string | null;
+  frase: string | null;
+  mensaje_final: string | null;
 }
 
 /**
@@ -31,6 +33,30 @@ export async function getPromocionBySlug(slug: string): Promise<Promocion | null
 
   if (error) {
     console.error('[getPromocionBySlug] Error:', error);
+    return null;
+  }
+
+  return data ?? null;
+}
+
+/**
+ * Obtiene la promoción activa y vigente en este momento (sin necesitar slug).
+ * Devuelve null si no hay ninguna activa.
+ */
+export async function getPromocionActiva(): Promise<Promocion | null> {
+  const ahora = new Date().toISOString();
+
+  const { data, error } = await supabase
+    .from('promociones')
+    .select('*')
+    .eq('activa', true)
+    .or(`fecha_fin.is.null,fecha_fin.gte.${ahora}`)
+    .order('creada_en', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    console.error('[getPromocionActiva] Error:', error);
     return null;
   }
 

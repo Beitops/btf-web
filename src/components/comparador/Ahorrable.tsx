@@ -49,7 +49,7 @@ const Ahorrable: FC<AhorrableProps> = ({
 						}}
 					>
 						<p className="text-base leading-relaxed text-gray-700 md:text-2xl md:leading-relaxed lg:text-3xl">
-							Este mes has pagado{' '}
+							En esta factura has pagado{' '}
 							<span
 								className="font-bold text-red-600"
 								style={{ fontFamily: "var(--font-primary, 'Poppins', sans-serif)" }}
@@ -127,46 +127,71 @@ const Ahorrable: FC<AhorrableProps> = ({
 							</button>
 
 							{desgloseAbierto && (
-								<div className="mt-3 overflow-hidden rounded-2xl border border-gray-100">
-									<table className="w-full text-sm md:text-base">
-										<thead>
-											<tr className="border-b border-gray-100 bg-gray-50">
-												<th className="px-4 py-2.5 text-left font-semibold text-gray-500 text-xs uppercase tracking-wide">
-													Concepto
-												</th>
-												<th className="px-4 py-2.5 text-right font-semibold text-gray-500 text-xs uppercase tracking-wide">
-													Actual
-												</th>
-												<th className="px-4 py-2.5 text-right font-semibold text-[#00a458] text-xs uppercase tracking-wide">
-													Nuevo
-												</th>
-											</tr>
-										</thead>
-										<tbody>
-											{filas.map((fila, i) => {
-												const esTotal = fila.label === 'Total factura';
-												return (
-													<tr
-														key={fila.label}
-														className={[
-															i < filas.length - 1 ? 'border-b border-gray-100' : '',
-															esTotal ? 'bg-gray-50 font-semibold' : '',
-														].join(' ')}
-													>
-														<td className={`px-4 py-2.5 text-left text-gray-700 ${esTotal ? 'font-semibold' : ''}`}>
-															{fila.label}
-														</td>
-														<td className={`px-4 py-2.5 text-right text-red-500 ${esTotal ? 'font-bold' : ''}`}>
-															{fila.actual != null ? `${euro(fila.actual)} €` : '—'}
-														</td>
-														<td className={`px-4 py-2.5 text-right text-[#00a458] ${esTotal ? 'font-bold' : ''}`}>
-															{fila.nuevo != null ? `${euro(fila.nuevo)} €` : '—'}
-														</td>
-													</tr>
-												);
-											})}
-										</tbody>
-									</table>
+								<div className="mt-4 grid grid-cols-2 gap-2 md:gap-3 text-left">
+									{/* Columna actual */}
+									<div className="rounded-2xl border border-red-100 bg-red-50 p-3 md:p-4">
+										<p className="truncate text-[9px] md:text-[10px] font-semibold uppercase tracking-widest text-red-400 mb-2 md:mb-3"
+											style={{ fontFamily: "var(--font-primary, 'Poppins', sans-serif)" }}>
+											{factura.nombreProveedor ?? 'Actual'}
+										</p>
+										<p className="text-xl md:text-2xl font-extrabold text-red-400 mb-0.5"
+											style={{ fontFamily: "var(--font-primary, 'Poppins', sans-serif)" }}>
+											{euro(totalActual)}<span className="text-xs md:text-sm font-semibold"> €</span>
+										</p>
+										<p className="text-[9px] md:text-[10px] text-red-300 mb-3 md:mb-4"
+											style={{ fontFamily: "var(--font-family-secondary, 'Montserrat', sans-serif)" }}>
+											este mes
+										</p>
+										<div className="space-y-1.5 md:space-y-2 border-t border-red-100 pt-2 md:pt-3">
+											{filas.slice(0, -1).map((fila) => (
+												<div key={fila.label} className="flex flex-col gap-0.5 md:flex-row md:items-center md:justify-between md:gap-2">
+													<span className="text-[9px] md:text-xs text-red-300 leading-tight"
+														style={{ fontFamily: "var(--font-family-secondary, 'Montserrat', sans-serif)" }}>
+														{fila.label}
+													</span>
+													<span className="text-[9px] md:text-xs font-semibold text-red-400 whitespace-nowrap">
+														{fila.actual != null ? `${euro(fila.actual)} €` : '—'}
+													</span>
+												</div>
+											))}
+										</div>
+									</div>
+
+									{/* Columna nueva */}
+									<div className="relative rounded-2xl border-2 border-[#00bf63] bg-[#00bf63]/5 p-3 md:p-4 shadow-md shadow-[#00bf63]/10">
+										{/* Badge */}
+										<div className="absolute -top-3 left-1/2 -translate-x-1/2">
+											<span className="whitespace-nowrap rounded-full bg-[#00bf63] px-2 py-0.5 text-[8px] md:text-[9px] font-bold text-white shadow"
+												style={{ fontFamily: "var(--font-primary, 'Poppins', sans-serif)" }}>
+												MEJOR PRECIO
+											</span>
+										</div>
+										<p className="truncate text-[9px] md:text-[10px] font-semibold uppercase tracking-widest text-[#00bf63] mb-2 md:mb-3"
+											style={{ fontFamily: "var(--font-primary, 'Poppins', sans-serif)" }}>
+											{ahorroSeleccionado.provider_name ?? 'Nueva tarifa'}
+										</p>
+										<p className="text-xl md:text-2xl font-extrabold text-[#00a458] mb-0.5"
+											style={{ fontFamily: "var(--font-primary, 'Poppins', sans-serif)" }}>
+											{euro(totalNuevo)}<span className="text-xs md:text-sm font-semibold"> €/mes</span>
+										</p>
+										<p className="text-[9px] md:text-[10px] text-[#00bf63] font-semibold mb-3 md:mb-4"
+											style={{ fontFamily: "var(--font-family-secondary, 'Montserrat', sans-serif)" }}>
+											~{euro(yearlySavings)} €/año menos
+										</p>
+										<div className="space-y-1.5 md:space-y-2 border-t border-[#00bf63]/20 pt-2 md:pt-3">
+											{filas.slice(0, -1).map((fila) => (
+												<div key={fila.label} className="flex flex-col gap-0.5 md:flex-row md:items-center md:justify-between md:gap-2">
+													<span className="text-[9px] md:text-xs text-[#00a458]/70 leading-tight"
+														style={{ fontFamily: "var(--font-family-secondary, 'Montserrat', sans-serif)" }}>
+														{fila.label}
+													</span>
+													<span className="text-[9px] md:text-xs font-semibold text-[#00a458] whitespace-nowrap">
+														{fila.nuevo != null ? `${euro(fila.nuevo)} €` : '—'}
+													</span>
+												</div>
+											))}
+										</div>
+									</div>
 								</div>
 							)}
 						</div>

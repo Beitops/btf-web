@@ -95,11 +95,11 @@ const ComparadorIsla: FC<ComparadorIslaProps> = ({
 
                 {/* Badge promoción */}
                 {promocion && (
-                    <div className="mb-3 inline-flex items-center justify-center gap-2 rounded-full border-2 border-black bg-black px-4 py-1.5 font-bold max-w-full">
+                    <div className="mt-12 mb-3 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-full border-2 border-black bg-black px-4 py-2 font-bold max-w-[90%] mx-auto">
                         <span className="text-sm shrink-0">🎉</span>
-                        <span className="uppercase tracking-wide text-white text-xs whitespace-nowrap">{promocion.nombre}</span>
+                        <span className="uppercase tracking-wide text-white text-[10px] md:text-xs whitespace-nowrap">{promocion.nombre}</span>
                         {promocion.regalo && (
-                            <span className="rounded-full bg-primary px-2 py-0.5 text-black font-extrabold text-xs whitespace-nowrap shrink-0">
+                            <span className="rounded-full bg-primary px-2 py-0.5 text-black font-extrabold text-[10px] md:text-xs whitespace-nowrap">
                                 {promocion.regalo}
                             </span>
                         )}

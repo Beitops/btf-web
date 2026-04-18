@@ -10,16 +10,17 @@ import Footer from "../components/Footer.astro";
 import Sergio_btf from "../assets/sections/Sergio_btf.png";
 import Section2 from "../assets/sections/Section2.png";
 import FacturinBanner2 from "../assets/facturin/FacturinBanner2.png";
-import { getPromocionBySlug, getPromocionBySlugCualquiera } from "../lib/promociones";
+import { getPromocionActiva, getPromocionBySlugCualquiera } from "../lib/promociones";
 
-// Leer UTM params — utm_campaign identifica la promoción (= slug)
+// Leer UTM params — se mantienen para tracking aunque la promoción se carga por activa
 const utmCampaign = Astro.url.searchParams.get('utm_campaign') ?? '';
 const utmSource   = Astro.url.searchParams.get('utm_source') ?? '';
 const utmMedium   = Astro.url.searchParams.get('utm_medium') ?? '';
 
-const promocion = utmCampaign ? await getPromocionBySlug(utmCampaign) : null;
+// Siempre se muestra la promoción activa, independientemente de los UTM
+const promocion = await getPromocionActiva();
 
-// Detectar si la promoción existe pero está expirada o inactiva
+// Detectar si vino con utm_campaign pero esa promoción concreta está expirada
 let promocionExpirada = false;
 if (utmCampaign && !promocion) {
   const cualquiera = await getPromocionBySlugCualquiera(utmCampaign);

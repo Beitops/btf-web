@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, type FC } from 'react';
 import Ahorrable from './comparador/Ahorrable';
 import BonoSocial from './comparador/BonoSocial';
-import Error from './comparador/Error';
+import ComparadorError from './comparador/Error';
 import NoAhorrable from './comparador/NoAhorrable';
 import YaEsCliente from './comparador/YaEsCliente';
 import PasoContratacion, {
@@ -24,7 +24,9 @@ import OctopusLogo from '../assets/comercializadoras/Octopus.svg';
 import RepsolLogo from '../assets/comercializadoras/Repsol.svg';
 import WekiwiLogo from '../assets/comercializadoras/Wekiwi.svg';
 import NeoluxLogo from '../assets/comercializadoras/Neolux.svg';
+import NibaLogo from '../assets/comercializadoras/niba-logo.svg';
 import facturinVideoWebm from '../assets/facturin/facturin_analizando.webm';
+import facturinVideoMov from '../assets/facturin/facturin-ios.mov';
 type LogoAsset = {
 	src: string;
 };
@@ -35,6 +37,7 @@ const providerLogoByName: Record<string, LogoAsset> = {
 	Naturgy: NaturgyLogo,
 	Octopus: OctopusLogo,
 	Neolux: NeoluxLogo,
+	Niba: NibaLogo,
 	Repsol: RepsolLogo,
 	Wekiwi: WekiwiLogo,
 };
@@ -62,11 +65,17 @@ interface WizardFormData {
 
 const SESSION_KEY = 'btf_session';
 
+interface ContratoActivoInfo {
+	direccion: string | null;
+	comerc: string | null;
+}
+
 interface PersistedSession {
 	nombre: string;
 	telefono: string;
 	pasoWizard: 1 | 2 | 3 | 4 | 5;
 	clienteInserted: boolean | null;
+	contratoActivoCliente: ContratoActivoInfo | null;
 	factura: FacturaData | null;
 	ahorrosPositivos: SavingCalculation[];
 	mejorAhorro: SavingCalculation | null;
@@ -151,7 +160,7 @@ const CloseButton: FC<{ onClick: () => void }> = ({ onClick }) => (
 	<button
 		type="button"
 		onClick={onClick}
-		className="absolute right-4 top-4 z-10 rounded-full p-2 transition-colors hover:bg-black/5 focus:outline-none focus:ring-2 focus:ring-black/20 md:right-6 md:top-6"
+		className="absolute right-3 top-1 z-10 rounded-full p-2 transition-colors hover:bg-black/5 focus:outline-none focus:ring-2 focus:ring-black/20 md:right-4 md:top-2"
 		aria-label="Cerrar"
 	>
 		<svg
@@ -205,11 +214,13 @@ const PasoDosHeading: FC<{ nombreProveedor: string }> = ({ nombreProveedor }) =>
 
 				if (logoAsset?.src) {
 					return (
-						<img
-							src={logoAsset.src}
-							alt={`Logo de ${nombreLimpio}`}
-							className="mx-auto h-16 w-auto object-contain md:h-20"
-						/>
+						<div className="mx-auto flex h-28 w-28 items-center justify-center rounded-full bg-white shadow-md md:h-32 md:w-32 p-5">
+							<img
+								src={logoAsset.src}
+								alt={`Logo de ${nombreLimpio}`}
+								className="h-full w-full object-contain"
+							/>
+						</div>
 					);
 				}
 
@@ -269,14 +280,16 @@ const LoadingView: FC = () => {
 			{/* Mascota Facturin */}
 			<video
 				ref={videoRef}
-				src={facturinVideoWebm}
 				autoPlay
 				loop
 				muted
 				playsInline
 				disablePictureInPicture
 				className="h-56 w-auto md:h-72 pointer-events-none block"
-			/>
+			>
+				<source src={facturinVideoMov} type="video/quicktime" />
+				<source src={facturinVideoWebm} type="video/webm" />
+			</video>
 
 			{/* Porcentaje grande */}
 			<div className="relative flex items-center justify-center">
@@ -382,6 +395,7 @@ const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, promocion, onCl
 	const [loading, setLoading] = useState(!session);
 	const [error, setError] = useState<string | null>(session?.error ?? null);
 	const [clienteInserted, setClienteInserted] = useState<boolean | null>(session?.clienteInserted ?? null);
+	const [contratoActivoCliente, setContratoActivoCliente] = useState<ContratoActivoInfo | null>(session?.contratoActivoCliente ?? null);
 	const [factura, setFactura] = useState<FacturaData | null>(session?.factura ?? null);
 	const [ahorrosPositivos, setAhorrosPositivos] = useState<SavingCalculation[]>(session?.ahorrosPositivos ?? []);
 	const [mejorAhorro, setMejorAhorro] = useState<SavingCalculation | null>(session?.mejorAhorro ?? null);
@@ -433,13 +447,14 @@ const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, promocion, onCl
 			telefono: telefono ?? '',
 			pasoWizard,
 			clienteInserted,
+			contratoActivoCliente,
 			factura,
 			ahorrosPositivos,
 			mejorAhorro,
 			error,
 			datosFormulario,
 		});
-	}, [loading, pasoWizard, datosFormulario, factura, clienteInserted, error]);
+	}, [loading, pasoWizard, datosFormulario, factura, clienteInserted, contratoActivoCliente, error]);
 
 	/* --- API call on mount --- */
 	useEffect(() => {
@@ -527,12 +542,9 @@ const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, promocion, onCl
 					const nombreProveedorActual = (facturaResponse.nombreProveedor ?? '')
 						.trim()
 						.toLowerCase();
-					const proveedorActualEsNaturgy = nombreProveedorActual === 'naturgy';
 					const positivosFiltradosPorProveedor = positivos.filter((saving) => {
 						const proveedorSaving = (saving.provider_name ?? '').trim().toLowerCase();
-						return proveedorActualEsNaturgy
-							? proveedorSaving !== 'naturgy'
-							: proveedorSaving === 'naturgy';
+						return proveedorSaving !== nombreProveedorActual;
 					});
 					const positivosOrdenados = [...positivosFiltradosPorProveedor].sort(
 						(a, b) => (a.total_amount ?? Number.POSITIVE_INFINITY) - (b.total_amount ?? Number.POSITIVE_INFINITY),
@@ -543,6 +555,7 @@ const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, promocion, onCl
 					const telefonoCliente = json.data?.cliente?.cliente?.telefono || telefono || '';
 
 					setClienteInserted(json.data?.cliente?.inserted ?? null);
+					setContratoActivoCliente((json.data?.cliente?.contratoActivo as ContratoActivoInfo | null) ?? null);
 					setFactura(facturaResponse);
 					setAhorrosPositivos(positivos);
 					setMejorAhorro(mejor);
@@ -598,8 +611,9 @@ const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, promocion, onCl
 					json.data?.cliente &&
 					json.data.cliente.inserted === false
 				) {
-					// Cliente ya existía en la BD: factura viene null, no es error
+					// Cliente ya existía en la BD con contrato activo
 					setClienteInserted(false);
+					setContratoActivoCliente(json.data.cliente.contratoActivo ?? null);
 					setFactura(null);
 					setError(null);
 					setAhorrosPositivos([]);
@@ -877,7 +891,7 @@ const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, promocion, onCl
 			>
 				<div className="mx-auto w-full max-w-lg text-center space-y-6">
 					{/* Icono check */}
-					<div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-black/10">
+					<div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-white/10">
 						<svg className="h-12 w-12 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
 						</svg>
@@ -889,14 +903,14 @@ const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, promocion, onCl
 							className="text-3xl font-bold text-gray-900 md:text-4xl"
 							style={{ fontFamily: "var(--font-primary, 'Poppins', sans-serif)" }}
 						>
-							¡Contrato enviado con éxito!
+							¡Contrato procesado con éxito!
 						</h2>
 						<p
 							className="text-base text-gray-800 md:text-lg"
 							style={{ fontFamily: "var(--font-family-secondary, 'Montserrat', sans-serif)" }}
 						>
-							Tu solicitud de cambio de comercializadora ha sido procesada correctamente.
-							En los próximos días recibirás confirmación por email con todos los detalles.
+							Tu solicitud de cambio de comercializadora ha sido procesada correctamente. 
+							En breve recibirás la confirmación por email con todos los detalles.
 						</p>
 						<p
 							className="text-sm text-gray-700"
@@ -929,8 +943,7 @@ const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, promocion, onCl
 			aria-modal="true"
 			aria-label="Dashboard de ahorro"
 		>
-			{onClose && !loading && error && <CloseButton onClick={handleClose} />}
-
+			
 			<div className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-5 py-10 md:px-8 md:py-14">
 				{/* Greeting */}
 				<div className="mb-8 text-center md:mb-10">
@@ -938,11 +951,11 @@ const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, promocion, onCl
 						<>
 							<PasoDosHeading nombreProveedor={mejorAhorro.provider_name ?? ''} />
 							{promocion && (
-								<div className="mt-4 inline-flex items-center gap-2 rounded-full border-2 border-black bg-black px-4 py-1.5 font-bold max-w-full">
+								<div className="mt-8 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-full border-2 border-black bg-black px-4 py-2 font-bold max-w-[90vw] mx-auto">
 									<span className="text-sm shrink-0">🎉</span>
-									<span className="uppercase tracking-wide text-white text-xs whitespace-nowrap">{promocion.nombre}</span>
+									<span className="uppercase tracking-wide text-white text-[10px] md:text-xs whitespace-nowrap">{promocion.nombre}</span>
 									{promocion.regalo && (
-										<span className="rounded-full bg-primary px-2 py-0.5 text-black font-extrabold text-xs whitespace-nowrap shrink-0">{promocion.regalo}</span>
+										<span className="rounded-full bg-primary px-2 py-0.5 text-black font-extrabold text-[10px] md:text-xs whitespace-nowrap">{promocion.regalo}</span>
 									)}
 								</div>
 							)}
@@ -951,11 +964,11 @@ const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, promocion, onCl
 						<>
 							<Greeting nombre={nombre} />
 							{promocion && (
-								<div className="mt-3 inline-flex items-center gap-2 rounded-full border-2 border-black bg-black px-4 py-1.5 font-bold max-w-full">
+								<div className="mt-8 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-full border-2 border-black bg-black px-4 py-2 font-bold max-w-[90vw] mx-auto">
 									<span className="text-sm shrink-0">🎉</span>
-									<span className="uppercase tracking-wide text-white text-xs whitespace-nowrap">{promocion.nombre}</span>
+									<span className="uppercase tracking-wide text-white text-[10px] md:text-xs whitespace-nowrap">{promocion.nombre}</span>
 									{promocion.regalo && (
-										<span className="rounded-full bg-primary px-2 py-0.5 text-black font-extrabold text-xs whitespace-nowrap shrink-0">{promocion.regalo}</span>
+										<span className="rounded-full bg-primary px-2 py-0.5 text-black font-extrabold text-[10px] md:text-xs whitespace-nowrap">{promocion.regalo}</span>
 									)}
 								</div>
 							)}
@@ -967,13 +980,16 @@ const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, promocion, onCl
 				{loading && <LoadingView />}
 
 				{/* Error */}
-				{!loading && error && <Error/>}
+				{!loading && error && <ComparadorError/>}
 
 				{/* Results */}
 				{!loading && !error && (factura || clienteInserted === false) && (
 					<>
 						{clienteInserted === false ? (
-							<YaEsCliente />
+							<YaEsCliente
+								direccion={contratoActivoCliente?.direccion ?? null}
+								comerc={contratoActivoCliente?.comerc ?? null}
+							/>
 						) : factura?.bonoSocial ? (
 							<BonoSocial />
 						) : factura && ahorrosPositivos.length > 0 && mejorAhorro ? (
@@ -1008,6 +1024,8 @@ const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, promocion, onCl
 												companiaElegida={
 													mejorAhorro.provider_name?.trim() || 'Tu nueva compañía'
 												}
+												saving={mejorAhorro}
+												mensajeFinal={promocion?.mensaje_final ?? null}
 												onBack={handleBackFromFinal}
 												onIbanChange={handleIbanChange}
 												onDireccionFacturacionDiferenteChange={handleBillingAddressToggle}
