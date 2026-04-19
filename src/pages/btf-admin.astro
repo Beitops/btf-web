@@ -17,7 +17,7 @@ if (Astro.request.method === 'POST') {
       return new Response(null, {
         status: 302,
         headers: {
-          'Set-Cookie': `btf_admin=${ADMIN_PASSWORD}; Path=/btf-admin; HttpOnly; SameSite=Strict`,
+          'Set-Cookie': `btf_admin=${ADMIN_PASSWORD}; Path=/; HttpOnly; SameSite=Strict`,
           'Location': '/btf-admin',
         },
       });
@@ -26,15 +26,22 @@ if (Astro.request.method === 'POST') {
 
   if (!isAuth) return new Response('No autorizado', { status: 401 });
 
+  function parseSlugsExtra(raw: FormDataEntryValue | null): string[] {
+    if (!raw) return [];
+    return String(raw).split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+  }
+
   if (action === 'crear') {
     const utmCampaign = String(body.get('utm_campaign')).trim();
     await crearPromocion({
       slug: utmCampaign,
+      slugs_extra: parseSlugsExtra(body.get('slugs_extra')),
       nombre: String(body.get('nombre')),
       descripcion: body.get('descripcion') ? String(body.get('descripcion')) : null,
       regalo: body.get('regalo') ? String(body.get('regalo')) : null,
       frase: body.get('frase') ? String(body.get('frase')) : null,
       mensaje_final: body.get('mensaje_final') ? String(body.get('mensaje_final')) : null,
+      imagen_popup: body.get('imagen_popup') ? String(body.get('imagen_popup')) : null,
       activa: body.get('activa') === 'on',
       fecha_inicio: body.get('fecha_inicio') ? String(body.get('fecha_inicio')) : null,
       fecha_fin: body.get('fecha_fin') ? String(body.get('fecha_fin')) : null,
@@ -49,11 +56,13 @@ if (Astro.request.method === 'POST') {
     const utmCampaign = String(body.get('utm_campaign')).trim();
     await actualizarPromocion(id, {
       slug: utmCampaign,
+      slugs_extra: parseSlugsExtra(body.get('slugs_extra')),
       nombre: String(body.get('nombre')),
       descripcion: body.get('descripcion') ? String(body.get('descripcion')) : null,
       regalo: body.get('regalo') ? String(body.get('regalo')) : null,
       frase: body.get('frase') ? String(body.get('frase')) : null,
       mensaje_final: body.get('mensaje_final') ? String(body.get('mensaje_final')) : null,
+      imagen_popup: body.get('imagen_popup') ? String(body.get('imagen_popup')) : null,
       activa: body.get('activa') === 'on',
       fecha_inicio: body.get('fecha_inicio') ? String(body.get('fecha_inicio')) : null,
       fecha_fin: body.get('fecha_fin') ? String(body.get('fecha_fin')) : null,
@@ -79,12 +88,17 @@ if (Astro.request.method === 'POST') {
 
 const promociones = isAuth ? await getAllPromociones() : [];
 
-function buildUrl(p: { slug: string; utm_source: string | null; utm_medium: string | null }) {
+function buildUrl(slug: string, p: { utm_source: string | null; utm_medium: string | null }) {
   const params = new URLSearchParams();
   if (p.utm_source) params.set('utm_source', p.utm_source);
   if (p.utm_medium) params.set('utm_medium', p.utm_medium);
-  params.set('utm_campaign', p.slug);
+  params.set('utm_campaign', slug);
   return `${BASE_URL}?${params.toString()}`;
+}
+
+function buildAllUrls(p: { slug: string; slugs_extra: string[]; utm_source: string | null; utm_medium: string | null }) {
+  const allSlugs = [p.slug, ...(p.slugs_extra ?? [])];
+  return allSlugs.map(s => ({ slug: s, url: buildUrl(s, p) }));
 }
 
 function fmtDate(d: string | null) {
@@ -149,6 +163,14 @@ function fmtDatetimeLocal(d: string | null) {
 
     .utm-tag { display: inline-block; background: #111; border: 1px solid #222; border-radius: 0.3rem; padding: 0.1rem 0.4rem; font-family: monospace; font-size: 0.65rem; color: #777; margin: 0.1rem 0.1rem 0 0; }
 
+    .img-upload-zone { border: 1.5px dashed #333; border-radius: 0.75rem; padding: 1rem; cursor: pointer; transition: border-color 0.15s; text-align: center; }
+    .img-upload-zone:hover { border-color: #00bf63; }
+    .img-upload-zone input[type="file"] { display: none; }
+    .img-preview { max-height: 120px; max-width: 100%; border-radius: 0.5rem; margin-top: 0.75rem; display: none; }
+    .img-upload-label { font-size: 0.78rem; color: #555; }
+    .img-upload-label span { color: #00bf63; font-weight: 600; cursor: pointer; }
+    .img-uploading { font-size: 0.72rem; color: #aaa; margin-top: 0.4rem; display: none; }
+
     .actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
 
     /* Modal de edición */
@@ -204,13 +226,27 @@ function fmtDatetimeLocal(d: string | null) {
               <label>Mensaje final contratación <span style="color:#444;font-weight:400">(aparece en el paso 3 del wizard)</span></label>
               <input type="text" name="mensaje_final" placeholder="¡Estás a punto de empezar a ahorrar!" />
             </div>
+            <div class="full">
+              <label>Imagen popup <span style="color:#444;font-weight:400">(aparece entre el contador y el botón)</span></label>
+              <input type="hidden" name="imagen_popup" id="crear-imagen-url" />
+              <div class="img-upload-zone" onclick="document.getElementById('crear-imagen-file').click()">
+                <input type="file" id="crear-imagen-file" accept="image/*" data-target="crear-imagen-url" data-preview="crear-imagen-preview" data-status="crear-imagen-status" />
+                <p class="img-upload-label">Arrastra una imagen o <span>haz clic para seleccionar</span></p>
+                <p class="img-uploading" id="crear-imagen-status">Subiendo...</p>
+                <img class="img-preview" id="crear-imagen-preview" alt="Preview" />
+              </div>
+            </div>
             <div>
-              <label>utm_campaign * <span style="color:#444;font-weight:400">(identificador)</span></label>
+              <label>utm_campaign * <span style="color:#444;font-weight:400">(slug principal)</span></label>
               <input type="text" name="utm_campaign" placeholder="feria_sevilla" required pattern="[a-z0-9_\-]+" title="Solo minúsculas, números, guiones" />
             </div>
             <div>
               <label>utm_source</label>
               <input type="text" name="utm_source" placeholder="qr" />
+            </div>
+            <div class="full">
+              <label>Slugs adicionales <span style="color:#444;font-weight:400">(uno por línea — para múltiples QR de la misma promo)</span></label>
+              <textarea name="slugs_extra" rows="2" placeholder="feria_sevilla_folleto&#10;feria_sevilla_cartel" style="resize:vertical"></textarea>
             </div>
             <div>
               <label>utm_medium</label>
@@ -259,24 +295,34 @@ function fmtDatetimeLocal(d: string | null) {
               </thead>
               <tbody>
                 {promociones.map((p) => {
-                  const url = buildUrl(p);
-                  const urlId = `url-${p.id}`;
+                  const urls = buildAllUrls(p);
                   return (
                     <tr>
                       <td>
                         <div style="font-weight:600;color:#e5e5e5">{p.nombre}</div>
                         {p.regalo && <div style="color:#00bf63;font-size:0.75rem;margin-top:0.2rem">{p.regalo}</div>}
                       </td>
-                      <td style="max-width:220px">
-                        <div class="url-text" id={urlId}>{url}</div>
-                        <button class="copy-btn" onclick={`navigator.clipboard.writeText(document.getElementById('${urlId}').textContent);this.textContent='✓ Copiada';setTimeout(()=>this.textContent='Copiar URL',1800)`}>
-                          Copiar URL
-                        </button>
+                      <td style="max-width:260px">
+                        {urls.map(({ slug, url }, i) => {
+                          const urlId = `url-${p.id}-${i}`;
+                          return (
+                            <div style="margin-bottom:0.5rem">
+                              <div style="font-size:0.65rem;color:#555;margin-bottom:0.1rem">{slug}</div>
+                              <div class="url-text" id={urlId}>{url}</div>
+                              <button class="copy-btn" onclick={`navigator.clipboard.writeText(document.getElementById('${urlId}').textContent);this.textContent='✓ Copiada';setTimeout(()=>this.textContent='Copiar',1800)`}>
+                                Copiar
+                              </button>
+                            </div>
+                          );
+                        })}
                       </td>
                       <td>
                         <span class="utm-tag">source: {p.utm_source ?? '—'}</span>
                         <span class="utm-tag">medium: {p.utm_medium ?? '—'}</span>
                         <span class="utm-tag">campaign: {p.slug}</span>
+                        {(p.slugs_extra ?? []).map(s => (
+                          <span class="utm-tag" style="color:#00bf63">+ {s}</span>
+                        ))}
                       </td>
                       <td>
                         <form method="POST" style="display:inline">
@@ -345,13 +391,27 @@ function fmtDatetimeLocal(d: string | null) {
           <label>Mensaje final contratación <span style="color:#444;font-weight:400">(aparece en el paso 3 del wizard)</span></label>
           <input type="text" name="mensaje_final" id="edit-mensaje-final" />
         </div>
+        <div class="full">
+          <label>Imagen popup <span style="color:#444;font-weight:400">(aparece entre el contador y el botón)</span></label>
+          <input type="hidden" name="imagen_popup" id="edit-imagen-url" />
+          <div class="img-upload-zone" onclick="document.getElementById('edit-imagen-file').click()">
+            <input type="file" id="edit-imagen-file" accept="image/*" data-target="edit-imagen-url" data-preview="edit-imagen-preview" data-status="edit-imagen-status" />
+            <p class="img-upload-label">Arrastra una imagen o <span>haz clic para seleccionar</span></p>
+            <p class="img-uploading" id="edit-imagen-status">Subiendo...</p>
+            <img class="img-preview" id="edit-imagen-preview" alt="Preview" />
+          </div>
+        </div>
         <div>
-          <label>utm_campaign *</label>
+          <label>utm_campaign * <span style="color:#444;font-weight:400">(slug principal)</span></label>
           <input type="text" name="utm_campaign" id="edit-campaign" required pattern="[a-z0-9_\-]+" />
         </div>
         <div>
           <label>utm_source</label>
           <input type="text" name="utm_source" id="edit-source" />
+        </div>
+        <div class="full">
+          <label>Slugs adicionales <span style="color:#444;font-weight:400">(uno por línea)</span></label>
+          <textarea name="slugs_extra" id="edit-slugs-extra" rows="2" style="resize:vertical"></textarea>
         </div>
         <div>
           <label>utm_medium</label>
@@ -373,12 +433,30 @@ function fmtDatetimeLocal(d: string | null) {
           <input type="checkbox" name="activa" id="edit-activa" />
           <label for="edit-activa" style="margin:0;text-transform:none;font-size:0.85rem;color:#aaa">Activa</label>
         </div>
-        <div class="full" style="display:flex;gap:0.5rem;margin-top:0.25rem">
+        <div class="full" style="display:flex;gap:0.5rem;margin-top:0.25rem;flex-wrap:wrap">
           <button type="submit" class="btn btn-green">Guardar cambios</button>
+          <button type="button" class="btn btn-blue" onclick="openLinksModal()">🔗 Crear enlaces</button>
           <button type="button" class="btn btn-gray" onclick="closeEditModal()">Cancelar</button>
         </div>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- Modal generador de enlaces -->
+<div class="modal-backdrop" id="links-modal">
+  <div class="modal" style="max-width:720px">
+    <button class="modal-close" onclick="closeLinksModal()">✕</button>
+    <h2>🔗 Crear enlaces — <span id="links-modal-nombre" style="color:#00bf63"></span></h2>
+    <p class="hint" style="margin-bottom:1.25rem">
+      Añade filas con diferentes UTMs para cada canal. Los slugs de campaign se guardan como slugs adicionales al pulsar "Guardar slugs".
+    </p>
+    <div id="links-rows"></div>
+    <button type="button" class="btn btn-gray btn-sm" onclick="addLinkRow()" style="margin-top:0.75rem">+ Añadir enlace</button>
+    <div style="display:flex;gap:0.5rem;margin-top:1.25rem;flex-wrap:wrap">
+      <button type="button" class="btn btn-green" onclick="saveLinksToForm()">Guardar slugs en la promo</button>
+      <button type="button" class="btn btn-gray" onclick="closeLinksModal()">Cerrar sin guardar</button>
+    </div>
   </div>
 </div>
 
@@ -391,6 +469,12 @@ function fmtDatetimeLocal(d: string | null) {
     document.getElementById('edit-frase').value = p.frase ?? '';
     document.getElementById('edit-mensaje-final').value = p.mensaje_final ?? '';
     document.getElementById('edit-campaign').value = p.slug ?? '';
+    document.getElementById('edit-slugs-extra').value = (p.slugs_extra ?? []).join('\n');
+    const imgUrl = p.imagen_popup ?? '';
+    document.getElementById('edit-imagen-url').value = imgUrl;
+    const editPreview = document.getElementById('edit-imagen-preview');
+    if (imgUrl) { editPreview.src = imgUrl; editPreview.style.display = 'block'; }
+    else { editPreview.src = ''; editPreview.style.display = 'none'; }
     document.getElementById('edit-source').value = p.utm_source ?? '';
     document.getElementById('edit-medium').value = p.utm_medium ?? '';
     document.getElementById('edit-descripcion').value = p.descripcion ?? '';
@@ -404,6 +488,171 @@ function fmtDatetimeLocal(d: string | null) {
   }
   document.getElementById('edit-modal').addEventListener('click', (e) => {
     if (e.target === e.currentTarget) closeEditModal();
+  });
+
+  // ── Generador de enlaces ──────────────────────────────────────────────────
+  const LINKS_BASE = 'https://bajatufactura.es/luz';
+  let linkRows = [];
+
+  function escHtml(str) {
+    return String(str ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function buildLinkUrl(source, medium, campaign) {
+    const p = new URLSearchParams();
+    if (source)   p.set('utm_source', source);
+    if (medium)   p.set('utm_medium', medium);
+    if (campaign) p.set('utm_campaign', campaign);
+    return `${LINKS_BASE}?${p.toString()}`;
+  }
+
+  function updateRowUrl(idx) {
+    const row = linkRows[idx];
+    if (!row) return;
+    const url = buildLinkUrl(row.source, row.medium, row.campaign);
+    const urlSpan = document.getElementById(`link-url-${idx}`);
+    const copyBtn = document.getElementById(`link-copy-${idx}`);
+    if (urlSpan) urlSpan.textContent = url;
+    if (copyBtn) { copyBtn.dataset.url = url; }
+  }
+
+  function renderLinkRows() {
+    const container = document.getElementById('links-rows');
+    container.innerHTML = '';
+    if (linkRows.length === 0) {
+      container.innerHTML = '<p style="color:#444;font-size:0.82rem;padding:0.5rem 0">No hay enlaces. Pulsa "+ Añadir enlace".</p>';
+      return;
+    }
+    linkRows.forEach((row, idx) => {
+      const url = buildLinkUrl(row.source, row.medium, row.campaign);
+      const div = document.createElement('div');
+      div.style.cssText = 'background:#111;border:1px solid #222;border-radius:0.75rem;padding:0.75rem 1rem;margin-bottom:0.6rem';
+      div.innerHTML = `
+        <div style="display:grid;grid-template-columns:1.2fr 1fr 1fr 1.5fr auto;gap:0.5rem;align-items:end;margin-bottom:0.6rem">
+          <div>
+            <label style="display:block;font-size:0.62rem;font-weight:700;color:#555;margin-bottom:0.2rem;text-transform:uppercase;letter-spacing:.05em">Etiqueta</label>
+            <input type="text" value="${escHtml(row.label)}" placeholder="QR folleto"
+              oninput="linkRows[${idx}].label=this.value"
+              style="width:100%;background:#0a0a0a;border:1px solid #2a2a2a;border-radius:0.4rem;color:#e5e5e5;padding:0.4rem 0.6rem;font-size:0.8rem" />
+          </div>
+          <div>
+            <label style="display:block;font-size:0.62rem;font-weight:700;color:#555;margin-bottom:0.2rem;text-transform:uppercase;letter-spacing:.05em">utm_source</label>
+            <input type="text" value="${escHtml(row.source)}" placeholder="qr / meta / email"
+              oninput="linkRows[${idx}].source=this.value; updateRowUrl(${idx})"
+              style="width:100%;background:#0a0a0a;border:1px solid #2a2a2a;border-radius:0.4rem;color:#e5e5e5;padding:0.4rem 0.6rem;font-size:0.8rem" />
+          </div>
+          <div>
+            <label style="display:block;font-size:0.62rem;font-weight:700;color:#555;margin-bottom:0.2rem;text-transform:uppercase;letter-spacing:.05em">utm_medium</label>
+            <input type="text" value="${escHtml(row.medium)}" placeholder="offline / paid / email"
+              oninput="linkRows[${idx}].medium=this.value; updateRowUrl(${idx})"
+              style="width:100%;background:#0a0a0a;border:1px solid #2a2a2a;border-radius:0.4rem;color:#e5e5e5;padding:0.4rem 0.6rem;font-size:0.8rem" />
+          </div>
+          <div>
+            <label style="display:block;font-size:0.62rem;font-weight:700;color:#555;margin-bottom:0.2rem;text-transform:uppercase;letter-spacing:.05em">utm_campaign (slug)</label>
+            <input type="text" value="${escHtml(row.campaign)}" placeholder="feria-sevilla-qr"
+              oninput="linkRows[${idx}].campaign=this.value; updateRowUrl(${idx})"
+              style="width:100%;background:#0a0a0a;border:1px solid #2a2a2a;border-radius:0.4rem;color:#e5e5e5;padding:0.4rem 0.6rem;font-size:0.8rem" />
+          </div>
+          <button type="button" onclick="removeLinkRow(${idx})"
+            style="background:transparent;border:none;color:#555;font-size:1.1rem;cursor:pointer;padding:0.3rem 0.5rem;align-self:end;line-height:1" title="Eliminar">✕</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap">
+          <span id="link-url-${idx}" style="font-family:monospace;font-size:0.7rem;color:#00bf63;flex:1;word-break:break-all">${escHtml(url)}</span>
+          <button type="button" id="link-copy-${idx}" class="copy-btn" data-url="${escHtml(url)}"
+            onclick="navigator.clipboard.writeText(this.dataset.url);this.textContent='✓ Copiada';setTimeout(()=>this.textContent='Copiar',1800)">Copiar</button>
+        </div>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  function addLinkRow() {
+    const source   = document.getElementById('edit-source').value;
+    const medium   = document.getElementById('edit-medium').value;
+    linkRows.push({ label: '', source, medium, campaign: '' });
+    renderLinkRows();
+    // focus the campaign input of the new row
+    const inputs = document.querySelectorAll('#links-rows input[type="text"]');
+    if (inputs.length >= 4) inputs[inputs.length - 2]?.focus();
+  }
+
+  function removeLinkRow(idx) {
+    linkRows.splice(idx, 1);
+    renderLinkRows();
+  }
+
+  function openLinksModal() {
+    const nombre     = document.getElementById('edit-nombre').value;
+    const primarySlug = document.getElementById('edit-campaign').value;
+    const source     = document.getElementById('edit-source').value;
+    const medium     = document.getElementById('edit-medium').value;
+    const extras     = document.getElementById('edit-slugs-extra').value
+                         .split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+
+    document.getElementById('links-modal-nombre').textContent = nombre;
+
+    // Pre-poblar con slug principal + extras existentes
+    linkRows = [];
+    if (primarySlug) linkRows.push({ label: 'Principal', source, medium, campaign: primarySlug });
+    extras.forEach(s => linkRows.push({ label: '', source, medium, campaign: s }));
+
+    renderLinkRows();
+    document.getElementById('links-modal').classList.add('open');
+  }
+
+  function closeLinksModal() {
+    document.getElementById('links-modal').classList.remove('open');
+  }
+
+  function saveLinksToForm() {
+    const primarySlug = document.getElementById('edit-campaign').value.trim();
+    const extras = linkRows
+      .map(r => r.campaign.trim())
+      .filter(s => s && s !== primarySlug);
+    const unique = [...new Set(extras)];
+    document.getElementById('edit-slugs-extra').value = unique.join('\n');
+    closeLinksModal();
+  }
+
+  document.getElementById('links-modal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeLinksModal();
+  });
+  // ─────────────────────────────────────────────────────────────────────────
+
+  // Upload de imagen al endpoint seguro
+  document.querySelectorAll('input[type="file"][data-target]').forEach((input) => {
+    input.addEventListener('change', async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      const targetId  = e.target.dataset.target;
+      const previewId = e.target.dataset.preview;
+      const statusId  = e.target.dataset.status;
+
+      const statusEl  = document.getElementById(statusId);
+      const previewEl = document.getElementById(previewId);
+      const urlEl     = document.getElementById(targetId);
+
+      statusEl.textContent = 'Subiendo...';
+      statusEl.style.display = 'block';
+      previewEl.style.display = 'none';
+
+      const fd = new FormData();
+      fd.append('file', file);
+
+      try {
+        const res  = await fetch('/api/upload-promo-image', { method: 'POST', body: fd });
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error ?? 'Error al subir');
+        urlEl.value = json.url;
+        previewEl.src = json.url;
+        previewEl.style.display = 'block';
+        statusEl.textContent = '✓ Imagen subida';
+        setTimeout(() => { statusEl.style.display = 'none'; }, 2500);
+      } catch (err) {
+        statusEl.textContent = '✗ ' + err.message;
+      }
+    });
   });
 </script>
 </body>

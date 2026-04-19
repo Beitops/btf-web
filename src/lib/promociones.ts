@@ -2,7 +2,8 @@ import supabase from './supabase';
 
 export interface Promocion {
   id: number;
-  slug: string;          // coincide con utm_campaign
+  slug: string;          // slug principal (= utm_campaign)
+  slugs_extra: string[]; // slugs adicionales que apuntan a esta misma promo
   nombre: string;
   descripcion: string | null;
   regalo: string | null;
@@ -14,6 +15,7 @@ export interface Promocion {
   utm_medium: string | null;
   frase: string | null;
   mensaje_final: string | null;
+  imagen_popup: string | null;
 }
 
 /**
@@ -26,7 +28,7 @@ export async function getPromocionBySlug(slug: string): Promise<Promocion | null
   const { data, error } = await supabase
     .from('promociones')
     .select('*')
-    .eq('slug', slug)
+    .or(`slug.eq.${slug},slugs_extra.cs.{${slug}}`)
     .eq('activa', true)
     .or(`fecha_fin.is.null,fecha_fin.gte.${ahora}`)
     .maybeSingle();
@@ -71,7 +73,7 @@ export async function getPromocionBySlugCualquiera(slug: string): Promise<Promoc
   const { data, error } = await supabase
     .from('promociones')
     .select('*')
-    .eq('slug', slug)
+    .or(`slug.eq.${slug},slugs_extra.cs.{${slug}}`)
     .maybeSingle();
 
   if (error) {

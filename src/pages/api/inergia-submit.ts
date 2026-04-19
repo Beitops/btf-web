@@ -50,8 +50,8 @@ export const POST: APIRoute = async ({ request }) => {
     }
   }
 
-  // Limpiar campos internos antes de enviar a INERGIA
-  const { electric_price_info_id: _a, plan_code: _b, provider_code: _c, ...bodyLimpio } = body;
+  // Extraer campos internos (no se envían a INERGIA)
+  const { electric_price_info_id: _a, plan_code: _b, provider_code: _c, btf_nombre: btfNombre, btf_telefono: btfTelefono, ...bodyLimpio } = body;
   const payload = { ...bodyLimpio, clave, crm_id, id_producto: idProducto };
 
   console.log('[inergia-submit] Enviando a INERGIA. id_producto:', idProducto);
@@ -74,6 +74,19 @@ export const POST: APIRoute = async ({ request }) => {
         JSON.stringify({ error: result?.raw ?? result?.error ?? `INERGIA ${res.status}` }),
         { status: res.status, headers: { 'Content-Type': 'application/json' } },
       );
+    }
+
+    // Contrato creado → registrar el cliente en Supabase
+    if (btfNombre && btfTelefono) {
+      try {
+        const telefonoNorm = String(btfTelefono).replace(/\s/g, '').replace(/^\+34/, '');
+        const { error: clienteError } = await supabase
+          .from('clientes')
+          .upsert({ nombre: String(btfNombre).trim(), telefono: telefonoNorm }, { onConflict: 'telefono', ignoreDuplicates: true });
+        if (clienteError) console.error('[inergia-submit] Error al crear cliente:', clienteError.message);
+      } catch (e) {
+        console.error('[inergia-submit] Excepción al crear cliente:', e);
+      }
     }
 
     return new Response(JSON.stringify(result), {

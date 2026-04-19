@@ -1,0 +1,90 @@
+---
+import type { Promocion } from '../lib/promociones';
+
+interface Props {
+  promocion: Promocion | null;
+}
+
+const { promocion } = Astro.props;
+if (!promocion?.fecha_fin) return;
+---
+
+<div id="countdown-bar" class="w-full bg-black text-white py-2 px-4 sticky top-0 z-50">
+  <div class="max-w-4xl mx-auto flex items-center justify-between gap-4">
+    <!-- Izquierda: regalo en móvil, frase+badge en desktop -->
+    <div class="flex items-center gap-2 shrink-0 max-w-[45%] sm:max-w-none">
+      <span class="hidden sm:flex h-6 w-6 items-center justify-center rounded-full text-black shrink-0" style="background-color: var(--color-primary)" aria-hidden="true">
+        <svg viewBox="0 0 20 20" fill="currentColor" class="h-3.5 w-3.5">
+          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+        </svg>
+      </span>
+      <!-- Móvil: regalo; Desktop: frase -->
+      <span class="sm:hidden flex h-6 w-6 items-center justify-center rounded-full text-black shrink-0" style="background-color: var(--color-primary)" aria-hidden="true">
+        <svg viewBox="0 0 20 20" fill="currentColor" class="h-3.5 w-3.5">
+          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+        </svg>
+      </span>
+      <span id="bar-texto-movil" class="sm:hidden font-bold text-white leading-tight">
+        {promocion.regalo ?? promocion.frase ?? 'Oferta limitada'}
+      </span>
+      <span class="hidden sm:block text-xs font-bold uppercase tracking-widest text-white leading-tight">
+        {promocion.frase ?? 'Oferta limitada'}
+      </span>
+    </div>
+
+    <!-- Contador -->
+    <div class="flex items-center gap-1.5 sm:gap-3">
+      {(['dias','horas','min','seg'] as const).map((u) => (
+        <div class="flex flex-col items-center bg-white/10 rounded-lg px-2 sm:px-3 py-1 min-w-[36px] sm:min-w-[52px]">
+          <span id={`bar-cd-${u}`} class="text-sm sm:text-xl font-extrabold text-white tabular-nums leading-none">--</span>
+          <span class="text-[8px] sm:text-[10px] font-semibold uppercase tracking-widest text-white/50 mt-0.5">{u}</span>
+        </div>
+      ))}
+    </div>
+
+    <!-- Espaciador para centrar el contador en desktop -->
+    <div class="hidden sm:block shrink-0 w-[80px]" />
+  </div>
+</div>
+
+<script define:vars={{ fechaFin: promocion.fecha_fin }}>
+  function initBarCountdown() {
+    const fin = new Date(fechaFin).getTime();
+
+    function tick() {
+      const diff = fin - Date.now();
+      if (diff <= 0) {
+        const bar = document.getElementById('countdown-bar');
+        if (bar) bar.style.display = 'none';
+        return;
+      }
+      const pad = (n) => String(Math.floor(n)).padStart(2, '0');
+      const el = (id) => document.getElementById(id);
+      if (el('bar-cd-dias'))  el('bar-cd-dias').textContent  = pad(diff / 86400000);
+      if (el('bar-cd-horas')) el('bar-cd-horas').textContent = pad((diff % 86400000) / 3600000);
+      if (el('bar-cd-min'))   el('bar-cd-min').textContent   = pad((diff % 3600000) / 60000);
+      if (el('bar-cd-seg'))   el('bar-cd-seg').textContent   = pad((diff % 60000) / 1000);
+    }
+
+    tick();
+    const interval = setInterval(tick, 1000);
+    document.addEventListener('astro:before-swap', () => clearInterval(interval), { once: true });
+  }
+
+  function adjustBarTextSize() {
+    const el = document.getElementById('bar-texto-movil');
+    if (!el) return;
+    const len = el.textContent?.trim().length ?? 0;
+    if (len <= 12)      el.style.fontSize = '1rem';
+    else if (len <= 22) el.style.fontSize = '0.8rem';
+    else                el.style.fontSize = '0.65rem';
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => { initBarCountdown(); adjustBarTextSize(); });
+  } else {
+    initBarCountdown();
+    adjustBarTextSize();
+  }
+  document.addEventListener('astro:page-load', () => { initBarCountdown(); adjustBarTextSize(); });
+</script>

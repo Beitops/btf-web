@@ -2,6 +2,8 @@
 import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
 import HeaderLanding from "../components/HeaderLanding.astro";
+import CountdownBar from "../components/CountdownBar.astro";
+import PromoPopup from "../components/PromoPopup.astro";
 import Hero from "../components/Hero.astro";
 import LogosCarrousel from "../components/LogosCarrousel.astro";
 import SectionImage from "../components/SectionImage.astro";
@@ -45,7 +47,9 @@ const faqs = [
 ---
 
 <Layout>
+	{esLanding && <CountdownBar promocion={promocion} />}
 	{esLanding ? <HeaderLanding /> : <Header />}
+	{esLanding && <PromoPopup promocion={promocion} />}
 
 	<main class="bg-body">
 		<div id="hero">

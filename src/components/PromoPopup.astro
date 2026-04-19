@@ -1,0 +1,128 @@
+---
+import type { Promocion } from '../lib/promociones';
+
+interface Props {
+  promocion: Promocion | null;
+}
+
+const { promocion } = Astro.props;
+if (!promocion) return;
+---
+
+<div
+  id="promo-popup-backdrop"
+  class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60"
+  style="display:none"
+  aria-modal="true"
+  role="dialog"
+>
+  <div
+    id="promo-popup"
+    class="relative w-full max-w-md rounded-3xl border border-black p-6 shadow-2xl"
+    style="background-color: var(--color-primary)"
+  >
+    <!-- Cerrar -->
+    <button
+      id="promo-popup-close"
+      type="button"
+      class="absolute right-4 top-4 rounded-lg p-1.5 transition-colors hover:bg-black/10"
+      aria-label="Cerrar"
+    >
+      <svg class="h-5 w-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+
+    <!-- Badge promo (estilo ComparadorIsla) -->
+    <div class="mt-4 mb-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-full border-2 border-black bg-black px-4 py-2 font-bold max-w-[90%] mx-auto">
+      <span class="text-sm shrink-0">🎉</span>
+      <span class="uppercase tracking-wide text-white text-xs whitespace-nowrap">{promocion.nombre}</span>
+      {promocion.regalo && (
+        <span class="rounded-full px-2 py-0.5 text-black font-extrabold text-xs whitespace-nowrap" style="background-color: var(--color-primary)">
+          {promocion.regalo}
+        </span>
+      )}
+    </div>
+
+    <!-- Título -->
+    <h2 class="text-center text-xl font-bold leading-tight text-black mb-4">
+      {promocion.frase ?? promocion.nombre}
+    </h2>
+
+    <!-- Contador -->
+    {promocion.fecha_fin && (
+      <div class="mb-5 flex justify-center gap-2">
+        {(['dias','horas','min','seg'] as const).map((u) => (
+          <div class="flex flex-col items-center bg-black rounded-xl px-3 py-2 min-w-[52px]">
+            <span id={`popup-cd-${u}`} class="text-2xl font-extrabold text-white tabular-nums leading-none">--</span>
+            <span class="text-[9px] font-semibold uppercase tracking-widest text-white/60 mt-0.5">{u}</span>
+          </div>
+        ))}
+      </div>
+    )}
+
+    <!-- Imagen (si existe) -->
+    {promocion.imagen_popup && (
+      <div class="flex justify-center mb-4">
+        <img src={promocion.imagen_popup} alt="" class="h-36 w-auto object-contain" loading="lazy" />
+      </div>
+    )}
+
+    <!-- CTA -->
+    <button
+      id="promo-popup-cta"
+      type="button"
+      class="w-full rounded-2xl bg-black px-4 py-3 font-bold uppercase tracking-wide text-white transition-opacity hover:opacity-80"
+    >
+      ¡Quiero aprovecharla!
+    </button>
+  </div>
+</div>
+
+<script define:vars={{ fechaFin: promocion.fecha_fin, promoId: promocion.id }}>
+  function initPromoPopup() {
+    const backdrop = document.getElementById('promo-popup-backdrop');
+    const closeBtn = document.getElementById('promo-popup-close');
+    const ctaBtn   = document.getElementById('promo-popup-cta');
+    if (!backdrop) return;
+
+    const key = `btf_promo_popup_${promoId}`;
+    if (sessionStorage.getItem(key)) return;
+
+    setTimeout(() => { backdrop.style.display = 'flex'; }, 800);
+
+    function cerrar() {
+      backdrop.style.display = 'none';
+      sessionStorage.setItem(key, '1');
+    }
+
+    closeBtn?.addEventListener('click', cerrar);
+    ctaBtn?.addEventListener('click', cerrar);
+    backdrop.addEventListener('click', (e) => { if (e.target === backdrop) cerrar(); });
+
+    if (fechaFin) {
+      const fin = new Date(fechaFin).getTime();
+      const pad = (n) => String(Math.floor(n)).padStart(2, '0');
+      const el = (id) => document.getElementById(id);
+
+      function tick() {
+        const diff = fin - Date.now();
+        if (diff <= 0) return;
+        if (el('popup-cd-dias'))  el('popup-cd-dias').textContent  = pad(diff / 86400000);
+        if (el('popup-cd-horas')) el('popup-cd-horas').textContent = pad((diff % 86400000) / 3600000);
+        if (el('popup-cd-min'))   el('popup-cd-min').textContent   = pad((diff % 3600000) / 60000);
+        if (el('popup-cd-seg'))   el('popup-cd-seg').textContent   = pad((diff % 60000) / 1000);
+      }
+      tick();
+      const interval = setInterval(tick, 1000);
+      document.addEventListener('astro:before-swap', () => clearInterval(interval), { once: true });
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPromoPopup);
+  } else {
+    initPromoPopup();
+  }
+  document.addEventListener('astro:page-load', initPromoPopup);
+</script>
