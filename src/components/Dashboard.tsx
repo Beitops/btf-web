@@ -786,6 +786,9 @@ const Dashboard: FC<DashboardProps> = ({ file, nombre, telefono, promocion, onCl
 				suministro: 'LUZ',
 				cups: s.cups,
 				// clave y crm_id los inyecta el servidor en /api/inergia-submit
+				// btf_nombre y btf_telefono son para crear el cliente en Supabase (el servidor los extrae)
+				btf_nombre: nombre,
+				btf_telefono: telefono,
 				dni: c.dniNie,
 				nombre: c.nombre,
 				ape1,

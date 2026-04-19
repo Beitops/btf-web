@@ -131,7 +131,8 @@ const PasoFinalContratacion: FC<PasoFinalContratacionProps> = ({
 								name="iban"
 								type="text"
 								required
-								inputMode="numeric"
+								inputMode="text"
+								autoCapitalize="characters"
 								maxLength={29}
 								className={ibanError ? inputErrorClassName : inputBaseClassName}
 								value={data.iban}

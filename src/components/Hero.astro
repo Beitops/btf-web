@@ -17,93 +17,10 @@ const { title, subtitle, promocion, utmSource, utmMedium, utmCampaign } = Astro.
 
 <section class="bg-primary pb-56 px-6">
 	<div class="max-w-4xl mx-auto text-center">
-		{promocion && (
-			<div class="mb-3 md:mb-5">
-				<div class="promo-badge inline-flex items-center gap-2 rounded-full border-2 border-black bg-black px-4 py-2 font-bold shadow-lg max-w-[90vw] md:max-w-full">
-					<span class="text-sm shrink-0">🎉</span>
-					<span class="tracking-wide uppercase text-xs text-white break-words text-center">{promocion.frase ?? promocion.nombre}</span>
-				</div>
-				</div>
-		)}
-		<!-- Contador regresivo -->
-		<div id="countdown-wrapper" class="flex justify-center gap-2 md:gap-5 mb-3 md:mb-6">
-			{(['dias','horas','min','seg'] as const).map((u) => (
-				<div class="flex flex-col items-center bg-black rounded-xl px-3 py-2 md:rounded-2xl md:px-6 md:py-4 min-w-[48px] md:min-w-[80px]">
-					<span id={`cd-${u}`} class="text-lg md:text-4xl font-extrabold text-primary tabular-nums leading-none">--</span>
-					<span class="text-[9px] md:text-xs font-semibold uppercase tracking-widest text-white/60 mt-0.5 md:mt-1">{u}</span>
-				</div>
-			))}
-		</div>
-
 		<h1 class="text-3xl md:text-5xl font-bold leading-tight mb-2 md:mb-6" set:html={title} />
 		<h2 class="text-xs md:text-lg text-gray-800 mb-6 md:mb-12" set:html={subtitle} />
 	</div>
 </section>
-
-<style>
-	@keyframes heartbeat {
-		0%   { transform: scale(1); }
-		14%  { transform: scale(1.08); }
-		28%  { transform: scale(1); }
-		42%  { transform: scale(1.05); }
-		56%  { transform: scale(1); }
-		100% { transform: scale(1); }
-	}
-	.promo-badge {
-		animation: heartbeat 1.6s ease-in-out infinite;
-		transform-origin: center;
-	}
-</style>
-
-<script>
-	function initCountdown() {
-		const fin = new Date('2026-04-26T23:59:59').getTime();
-
-		function tick() {
-			const ahora = Date.now();
-			const diff = fin - ahora;
-
-			if (diff <= 0) {
-				['dias','horas','min','seg'].forEach(u => {
-					const el = document.getElementById(`cd-${u}`);
-					if (el) el.textContent = '00';
-				});
-				const wrapper = document.getElementById('countdown-wrapper');
-				if (wrapper) wrapper.style.display = 'none';
-				return;
-			}
-
-			const dias    = Math.floor(diff / 86400000);
-			const horas   = Math.floor((diff % 86400000) / 3600000);
-			const minutos = Math.floor((diff % 3600000) / 60000);
-			const segundos = Math.floor((diff % 60000) / 1000);
-
-			const pad = (n: number) => String(n).padStart(2, '0');
-
-			const elDias = document.getElementById('cd-dias');
-			const elHoras = document.getElementById('cd-horas');
-			const elMinutos = document.getElementById('cd-min');
-			const elSegundos = document.getElementById('cd-seg');
-
-			if (elDias) elDias.textContent = pad(dias);
-			if (elHoras) elHoras.textContent = pad(horas);
-			if (elMinutos) elMinutos.textContent = pad(minutos);
-			if (elSegundos) elSegundos.textContent = pad(segundos);
-		}
-
-		tick();
-		const interval = setInterval(tick, 1000);
-
-		document.addEventListener('astro:before-swap', () => clearInterval(interval), { once: true });
-	}
-
-	if (document.readyState === 'loading') {
-		document.addEventListener('DOMContentLoaded', initCountdown);
-	} else {
-		initCountdown();
-	}
-	document.addEventListener('astro:page-load', initCountdown);
-</script>
 
 <div class="px-6 -mt-55 relative pb-16">
 	<div class="max-w-3xl mx-auto">

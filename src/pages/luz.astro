@@ -10,6 +10,8 @@ import Footer from "../components/Footer.astro";
 import Sergio_btf from "../assets/sections/Sergio_btf.png";
 import Section2 from "../assets/sections/Section2.png";
 import FacturinBanner2 from "../assets/facturin/FacturinBanner2.png";
+import CountdownBar from "../components/CountdownBar.astro";
+import PromoPopup from "../components/PromoPopup.astro";
 import { getPromocionActiva, getPromocionBySlugCualquiera } from "../lib/promociones";
 
 // Leer UTM params — se mantienen para tracking aunque la promoción se carga por activa
@@ -71,7 +73,9 @@ const faqs = [
   </Layout>
 ) : (
 <Layout>
+	<CountdownBar promocion={promocion} />
 	<Header />
+	<PromoPopup promocion={promocion} />
 
 	<main class="bg-body">
 		<div id="hero">
