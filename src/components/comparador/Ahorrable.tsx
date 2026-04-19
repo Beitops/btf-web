@@ -2,6 +2,7 @@ import React, { useState, type FC } from 'react';
 import type { FacturaData, SavingCalculation } from '../../types/factura';
 import type { Promocion } from '../../lib/promociones';
 
+// Interface para ahorrable
 interface AhorrableProps {
 	factura: FacturaData;
 	ahorroSeleccionado: SavingCalculation;
