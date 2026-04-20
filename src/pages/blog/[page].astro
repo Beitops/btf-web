@@ -1,8 +1,11 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import Header from "../../components/Header.astro";
+import CountdownBar from "../../components/CountdownBar.astro";
+import PromoPopup from "../../components/PromoPopup.astro";
 import Footer from "../../components/Footer.astro";
 import type { IndexPost, GraphQLResponse } from "./index.astro";
+import { getPromocionActiva } from "../../lib/promociones";
 
 
 
@@ -102,10 +105,14 @@ const { posts, totalPages } = Astro.props as Props;
 const hasNextPage = page < totalPages;
 const hasPreviousPage = page > 1;
 
+const promocion = await getPromocionActiva();
+
 ---
 
 <Layout>
+  <CountdownBar promocion={promocion} />
   <Header />
+  <PromoPopup promocion={promocion} />
 
   <main class="bg-body">
     <div class="container mx-auto px-4 py-12 md:py-16">

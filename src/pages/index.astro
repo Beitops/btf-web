@@ -73,9 +73,9 @@ const faqs = [
   </Layout>
 ) : (
 <Layout>
-	{esLanding && <CountdownBar promocion={promocion} />}
-	{esLanding ? <HeaderLanding /> : <Header />}
-	{esLanding && <PromoPopup promocion={promocion} />}
+	<CountdownBar promocion={promocion} />
+	<Header />
+	<PromoPopup promocion={promocion} />
 
 	<main class="bg-body">
 		<div id="hero">
