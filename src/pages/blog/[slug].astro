@@ -5,17 +5,31 @@ import Footer from "../../components/Footer.astro";
 import type { WordPressPost, BlogPost, GraphQLResponse } from "./index.astro";
 import * as cheerio from "cheerio";
 
+export const prerender = true;
+
 // getStaticPaths: Generate all blog post routes at build time
 export async function getStaticPaths() {
   const WP_URL = import.meta.env.WP_URL as string | undefined;
+  const normalizedWpUrl = (() => {
+    if (!WP_URL) return null;
+    const trimmed = WP_URL.trim();
+    if (!trimmed) return null;
+    const withProtocol = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+
+    try {
+      return new URL(withProtocol).toString();
+    } catch {
+      return null;
+    }
+  })();
   
-  if (!WP_URL) {
-    console.error("WP_URL is not defined in environment variables");
+  if (!normalizedWpUrl) {
+    console.error("WP_URL is missing or invalid in environment variables");
     return [];
   }
   
   try {
-    const response = await fetch(WP_URL, {
+    const response = await fetch(normalizedWpUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
