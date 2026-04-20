@@ -1,5 +1,6 @@
 ---
 import { getAllPromociones, crearPromocion, actualizarPromocion, eliminarPromocion } from '../lib/promociones';
+import { getAllConfig, setConfig } from '../lib/configuracion';
 
 const ADMIN_PASSWORD = import.meta.env.BTF_ADMIN_PASSWORD;
 const BASE_URL = 'https://bajatufactura.es/luz';
@@ -84,9 +85,17 @@ if (Astro.request.method === 'POST') {
     await eliminarPromocion(id);
     return Astro.redirect('/btf-admin');
   }
+
+  if (action === 'toggle-config') {
+    const clave = String(body.get('clave'));
+    const actual = body.get('valor') === 'true';
+    await setConfig(clave, !actual);
+    return Astro.redirect('/btf-admin');
+  }
 }
 
 const promociones = isAuth ? await getAllPromociones() : [];
+const config = isAuth ? await getAllConfig() : {};
 
 function buildUrl(slug: string, p: { utm_source: string | null; utm_medium: string | null }) {
   const params = new URLSearchParams();
@@ -202,6 +211,35 @@ function fmtDatetimeLocal(d: string | null) {
   ) : (
     <>
       <h1>BTF Admin — Promociones</h1>
+
+      <!-- Configuración -->
+      <div class="card" style="margin-bottom:1.5rem">
+        <h2>Configuración</h2>
+        <div style="display:flex;flex-direction:column;gap:0.75rem">
+          {[
+            { clave: 'dni_ia_activo', label: 'Análisis IA de DNI', desc: 'Valida los documentos de identidad con Claude. Si está desactivado, se omite la validación.' },
+            { clave: 'sms_verificacion_activo', label: 'Verificación SMS (Twilio)', desc: 'Envía un código SMS para verificar el teléfono. Si está desactivado, se omite el paso de OTP.' },
+          ].map(({ clave, label, desc }) => {
+            const activo = config[clave] !== false;
+            return (
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:0.85rem 1rem;background:#111;border:1px solid #222;border-radius:0.75rem">
+                <div>
+                  <div style="font-size:0.85rem;font-weight:600;color:#e5e5e5">{label}</div>
+                  <div style="font-size:0.72rem;color:#555;margin-top:0.2rem">{desc}</div>
+                </div>
+                <form method="POST" style="flex-shrink:0">
+                  <input type="hidden" name="action" value="toggle-config" />
+                  <input type="hidden" name="clave" value={clave} />
+                  <input type="hidden" name="valor" value={String(activo)} />
+                  <button type="submit" class={`badge ${activo ? 'badge-on' : 'badge-off'}`} style="cursor:pointer;border:none;white-space:nowrap" title={activo ? 'Clic para desactivar' : 'Clic para activar'}>
+                    {activo ? '● Activo' : '○ Inactivo'}
+                  </button>
+                </form>
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
       <!-- Crear nueva -->
       <div class="card">

@@ -8,6 +8,7 @@ export interface ComparadorIslaProps {
     onClose: () => void;
     onAnalyze?: (data: { file: File; nombre: string; telefono: string }) => void;
     promocion?: Promocion | null;
+    smsActivo?: boolean;
 }
 
 function validarTelefono(valor: string): string | null {
@@ -37,6 +38,7 @@ const ComparadorIsla: FC<ComparadorIslaProps> = ({
     onClose,
     onAnalyze,
     promocion,
+    smsActivo = true,
 }) => {
     const [step, setStep] = useState<Step>('form');
     const [telefonoError, setTelefonoError] = useState<string | null>(null);
@@ -76,6 +78,11 @@ const ComparadorIsla: FC<ComparadorIslaProps> = ({
         const error = validarTelefono(telClean);
         if (error) { setTelefonoError(error); return; }
         setTelefonoError(null);
+
+        if (!smsActivo) {
+            onAnalyze?.({ file, nombre: nombreVal, telefono: telClean });
+            return;
+        }
 
         setLoadingSend(true);
         try {

@@ -9,9 +9,10 @@ interface Props {
   utmSource?: string;
   utmMedium?: string;
   utmCampaign?: string;
+  smsActivo?: boolean;
 }
 
-const { promocion, utmSource, utmMedium, utmCampaign } = Astro.props;
+const { promocion, utmSource, utmMedium, utmCampaign, smsActivo = true } = Astro.props;
 ---
 <ReactInit client:only="react" />
 
@@ -22,6 +23,7 @@ const { promocion, utmSource, utmMedium, utmCampaign } = Astro.props;
 	data-utm-source={utmSource ?? null}
 	data-utm-medium={utmMedium ?? null}
 	data-utm-campaign={utmCampaign ?? null}
+	data-sms-activo={smsActivo ? 'true' : 'false'}
 >
 	<div class="mb-12 flex flex-col md:flex-row items-center justify-center gap-6 md:gap-8">
 		<div class="order-2 flex justify-end flex-1 md:order-1 shrink-0">

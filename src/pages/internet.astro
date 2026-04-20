@@ -1,6 +1,8 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import Header from "../components/Header.astro";
+import Header from "../components/HeaderLanding.astro";
+import CountdownBar from "../components/CountdownBar.astro";
+import PromoPopup from "../components/PromoPopup.astro";
 import Hero from "../components/Hero.astro";
 import LogosCarrousel from "../components/LogosCarrousel.astro";
 import SectionImage from "../components/SectionImage.astro";
@@ -10,6 +12,13 @@ import Footer from "../components/Footer.astro";
 import Sergio_btf from "../assets/sections/Sergio_btf.png";
 import Section2 from "../assets/sections/Section2.png";
 import FacturinBanner2 from "../assets/facturin/FacturinBanner2.png";
+import { getPromocionActiva } from "../lib/promociones";
+import { getConfig } from "../lib/configuracion";
+
+const [promocion, smsActivo] = await Promise.all([
+  getPromocionActiva(),
+  getConfig('sms_verificacion_activo'),
+]);
 
 const faqs = [
 	{
@@ -44,13 +53,17 @@ const faqs = [
 ---
 
 <Layout>
+	<CountdownBar promocion={promocion} />
 	<Header />
+	<PromoPopup promocion={promocion} />
 
 	<main class="bg-body">
 		<div id="hero">
-			<Hero 
+			<Hero
 				title='Revisa tu factura de telefonía y deja de pagar por lo que no usas'
 				subtitle='Sube tu factura de móvil o internet y comprueba gratis<br/>si tu tarifa sigue teniendo sentido hoy.'
+				promocion={promocion}
+				smsActivo={smsActivo}
 			/>
 		</div>
 	</main>

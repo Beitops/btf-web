@@ -10,9 +10,10 @@ interface Props {
 	utmSource?: string;
 	utmMedium?: string;
 	utmCampaign?: string;
+	smsActivo?: boolean;
 }
 
-const { title, subtitle, promocion, utmSource, utmMedium, utmCampaign } = Astro.props;
+const { title, subtitle, promocion, utmSource, utmMedium, utmCampaign, smsActivo = true } = Astro.props;
 ---
 
 <section class="bg-primary pb-56 px-6">
@@ -24,7 +25,7 @@ const { title, subtitle, promocion, utmSource, utmMedium, utmCampaign } = Astro.
 
 <div class="px-6 -mt-55 relative pb-16">
 	<div class="max-w-3xl mx-auto">
-		<Comparador promocion={promocion} utmSource={utmSource} utmMedium={utmMedium} utmCampaign={utmCampaign} />
+		<Comparador promocion={promocion} utmSource={utmSource} utmMedium={utmMedium} utmCampaign={utmCampaign} smsActivo={smsActivo} />
 		<div class="mt-6 flex justify-center">
 			<ReviewsBar />
 		</div>

@@ -12,6 +12,7 @@ function initComparadorDropzone() {
 	const utmSource   = dropzone.getAttribute('data-utm-source') ?? '';
 	const utmMedium   = dropzone.getAttribute('data-utm-medium') ?? '';
 	const utmCampaign = dropzone.getAttribute('data-utm-campaign') ?? '';
+	const smsActivo   = dropzone.getAttribute('data-sms-activo') !== 'false';
 	const container = document.getElementById('comparador-modal-root');
 
 	const errorEl = document.getElementById('dropzone-error');
@@ -144,7 +145,7 @@ function initComparadorDropzone() {
 			});
 		};
 		root.render(
-			React.createElement(ComparadorIsla, { file, onClose, onAnalyze, promocion })
+			React.createElement(ComparadorIsla, { file, onClose, onAnalyze, promocion, smsActivo })
 		);
 	}
 }

@@ -13,6 +13,7 @@ import FacturinBanner2 from "../assets/facturin/FacturinBanner2.png";
 import CountdownBar from "../components/CountdownBar.astro";
 import PromoPopup from "../components/PromoPopup.astro";
 import { getPromocionActiva, getPromocionBySlugCualquiera } from "../lib/promociones";
+import { getConfig } from "../lib/configuracion";
 
 // Leer UTM params — se mantienen para tracking aunque la promoción se carga por activa
 const utmCampaign = Astro.url.searchParams.get('utm_campaign') ?? '';
@@ -20,7 +21,10 @@ const utmSource   = Astro.url.searchParams.get('utm_source') ?? '';
 const utmMedium   = Astro.url.searchParams.get('utm_medium') ?? '';
 
 // Siempre se muestra la promoción activa, independientemente de los UTM
-const promocion = await getPromocionActiva();
+const [promocion, smsActivo] = await Promise.all([
+  getPromocionActiva(),
+  getConfig('sms_verificacion_activo'),
+]);
 
 // Detectar si vino con utm_campaign pero esa promoción concreta está expirada
 let promocionExpirada = false;
@@ -86,6 +90,7 @@ const faqs = [
 				utmSource={utmSource}
 				utmMedium={utmMedium}
 				utmCampaign={utmCampaign}
+				smsActivo={smsActivo}
 			/>
 		</div>
 	</main>

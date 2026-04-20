@@ -1,6 +1,8 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Header from "../components/HeaderLanding.astro";
+import CountdownBar from "../components/CountdownBar.astro";
+import PromoPopup from "../components/PromoPopup.astro";
 import Hero from "../components/Hero.astro";
 import LogosCarrousel from "../components/LogosCarrousel.astro";
 import SectionImage from "../components/SectionImage.astro";
@@ -11,8 +13,12 @@ import Sergio_btf from "../assets/sections/Sergio_btf.png";
 import Section2 from "../assets/sections/Section2.png";
 import FacturinBanner2 from "../assets/facturin/FacturinBanner2.png";
 import { getPromocionBySlug } from "../lib/promociones";
+import { getConfig } from "../lib/configuracion";
 
-const promocion = await getPromocionBySlug('feria-sevilla-2026');
+const [promocion, smsActivo] = await Promise.all([
+  getPromocionBySlug('feria-sevilla-2026'),
+  getConfig('sms_verificacion_activo'),
+]);
 
 const faqs = [
 	{
@@ -39,7 +45,9 @@ const faqs = [
 ---
 
 <Layout>
+	<CountdownBar promocion={promocion} />
 	<Header />
+	<PromoPopup promocion={promocion} />
 
 	<main class="bg-body">
 		<div id="hero">
@@ -47,6 +55,7 @@ const faqs = [
 				title='Compara y baja tu factura de<br/>luz <span class="font-normal italic">sin llamadas.</span>'
 				subtitle='Arrastra tu factura y comprueba si estás pagando<br/>lo justo de forma totalmente gratuita.'
 				promocion={promocion}
+				smsActivo={smsActivo}
 			/>
 		</div>
 	</main>

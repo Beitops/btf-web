@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import Anthropic from '@anthropic-ai/sdk';
+import { getConfig } from '../../lib/configuracion';
 
 export const prerender = false;
 
@@ -8,6 +9,14 @@ Tu única tarea es analizar si la imagen proporcionada es un DNI o NIE español 
 Responde SIEMPRE y ÚNICAMENTE con JSON válido, sin texto adicional.`;
 
 export const POST: APIRoute = async ({ request }) => {
+  const dniIaActivo = await getConfig('dni_ia_activo');
+  if (!dniIaActivo) {
+    return new Response(
+      JSON.stringify({ valido: true, tipo: 'mock', lado: 'frente', motivo: 'Validación de DNI desactivada.' }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } },
+    );
+  }
+
   const apiKey = import.meta.env.ANTHROPIC_API_KEY;
   console.log('[validar-dni] API key presente:', !!apiKey);
 
