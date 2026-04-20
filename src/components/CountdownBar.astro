@@ -6,7 +6,7 @@ interface Props {
 }
 
 const { promocion } = Astro.props;
-if (!promocion?.fecha_fin) return;
+if (!promocion) return;
 ---
 
 <div id="countdown-bar" class="w-full bg-black text-white py-2 px-4 sticky top-0 z-50">
@@ -32,23 +32,32 @@ if (!promocion?.fecha_fin) return;
       </span>
     </div>
 
-    <!-- Contador -->
-    <div class="flex items-center gap-1.5 sm:gap-3">
-      {(['dias','horas','min','seg'] as const).map((u) => (
-        <div class="flex flex-col items-center bg-white/10 rounded-lg px-2 sm:px-3 py-1 min-w-[36px] sm:min-w-[52px]">
-          <span id={`bar-cd-${u}`} class="text-sm sm:text-xl font-extrabold text-white tabular-nums leading-none">--</span>
-          <span class="text-[8px] sm:text-[10px] font-semibold uppercase tracking-widest text-white/50 mt-0.5">{u}</span>
-        </div>
-      ))}
-    </div>
+    <!-- Contador (solo si hay fecha_fin) -->
+    {promocion.fecha_fin ? (
+      <div class="flex items-center gap-1.5 sm:gap-3">
+        {(['dias','horas','min','seg'] as const).map((u) => (
+          <div class="flex flex-col items-center bg-white/10 rounded-lg px-2 sm:px-3 py-1 min-w-[36px] sm:min-w-[52px]">
+            <span id={`bar-cd-${u}`} class="text-sm sm:text-xl font-extrabold text-white tabular-nums leading-none">--</span>
+            <span class="text-[8px] sm:text-[10px] font-semibold uppercase tracking-widest text-white/50 mt-0.5">{u}</span>
+          </div>
+        ))}
+      </div>
+    ) : (
+      promocion.regalo && (
+        <span class="hidden sm:inline-block text-xs font-extrabold uppercase tracking-widest px-3 py-1 rounded-full bg-white/10 text-white whitespace-nowrap">
+          {promocion.regalo}
+        </span>
+      )
+    )}
 
-    <!-- Espaciador para centrar el contador en desktop -->
+    <!-- Espaciador para centrar el contenido en desktop -->
     <div class="hidden sm:block shrink-0 w-[80px]" />
   </div>
 </div>
 
-<script define:vars={{ fechaFin: promocion.fecha_fin }}>
+<script define:vars={{ fechaFin: promocion.fecha_fin ?? null }}>
   function initBarCountdown() {
+    if (!fechaFin) return;
     const fin = new Date(fechaFin).getTime();
 
     function tick() {
