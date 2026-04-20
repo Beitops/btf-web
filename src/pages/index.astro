@@ -72,9 +72,9 @@ const faqs = [
   </Layout>
 ) : (
 <Layout>
-	<CountdownBar promocion={promocion} />
-	<HeaderLanding />
-	<PromoPopup promocion={promocion} />
+	{(promocion || utmSource || utmMedium || utmCampaign) && <CountdownBar promocion={promocion} />}
+	{(promocion || utmSource || utmMedium || utmCampaign) ? <HeaderLanding /> : <Header />}
+	{(promocion || utmSource || utmMedium || utmCampaign) && <PromoPopup promocion={promocion} />}
 
 	<main class="bg-body">
 		<div id="hero">
