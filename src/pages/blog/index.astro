@@ -3,6 +3,8 @@ import Layout from "../../layouts/Layout.astro";
 import Header from "../../components/Header.astro";
 import Footer from "../../components/Footer.astro";
 
+export const prerender = true;
+
 // TypeScript interfaces for WordPress GraphQL data - exported for use in other files
 export interface MediaDetails {
   width: number | null;
@@ -66,18 +68,28 @@ export interface GraphQLResponse<T = WordPressPost> {
 }
 
 const WP_URL = import.meta.env.WP_URL as string | undefined;
-const postsPerPage = 10;
+const normalizedWpUrl = (() => {
+  if (!WP_URL) return null;
+  const trimmed = WP_URL.trim();
+  if (!trimmed) return null;
+  const withProtocol = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
 
-// Fetch all posts at build time for the first page
+  try {
+    return new URL(withProtocol).toString();
+  } catch {
+    return null;
+  }
+})();
+
+// Fetch all posts at build time
 let posts: IndexPost[] = [];
-let totalPages = 1;
 
-if (!WP_URL) {
-  console.error("WP_URL is not defined in environment variables");
+if (!normalizedWpUrl) {
+  console.error("WP_URL is missing or invalid in environment variables");
 } else {
   try {
     // Fetch all posts to calculate pagination
-    const allPostsResponse = await fetch(WP_URL, {
+    const allPostsResponse = await fetch(normalizedWpUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -113,21 +125,13 @@ if (!WP_URL) {
     const allPostsData = (await allPostsResponse.json()) as GraphQLResponse<IndexPost>;
     
     if (allPostsData.data?.posts?.nodes) {
-      const allPosts = allPostsData.data.posts.nodes;
-      totalPages = Math.ceil(allPosts.length / postsPerPage);
-      
-      // Get posts for first page
-      posts = allPosts.slice(0, postsPerPage);
+      posts = allPostsData.data.posts.nodes;
     }
   } catch (error: unknown) {
     console.error("Error fetching posts:", error);
     posts = [];
   }
 }
-
-const page = 1;
-const hasNextPage = page < totalPages;
-const hasPreviousPage = false;
 
 ---
 
@@ -206,32 +210,6 @@ const hasPreviousPage = false;
         </div>
       )}
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div class="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
-          {hasPreviousPage && (
-            <a
-              href="/blog"
-              class="px-6 py-3 border border-black rounded-[20px] hover:bg-primary transition-colors font-medium font-family-primary"
-            >
-              ← Anterior
-            </a>
-          )}
-          
-          <span class="px-6 py-3 text-gray-700 font-family-secondary">
-            Página {page} de {totalPages}
-          </span>
-          
-          {hasNextPage && (
-            <a
-              href={`/blog/${page + 1}`}
-              class="px-6 py-3 border border-black rounded-[20px] hover:bg-primary transition-colors font-medium font-family-primary"
-            >
-              Siguiente →
-            </a>
-          )}
-        </div>
-      )}
     </div>
   </main>
 
