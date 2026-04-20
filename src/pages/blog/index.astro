@@ -8,6 +8,7 @@ import { getPromocionActiva } from "../../lib/promociones";
 
 const promocion = await getPromocionActiva();
 
+// Important prerender true to avoid SSR
 export const prerender = true;
 
 // TypeScript interfaces for WordPress GraphQL data - exported for use in other files
