@@ -499,8 +499,11 @@ function fmtDatetimeLocal(d: string | null) {
 </div>
 
 <script is:inline>
+  let _currentPromo = null;
+
   function openEditModal(jsonStr) {
     const p = JSON.parse(jsonStr);
+    _currentPromo = p;
     document.getElementById('edit-id').value = p.id;
     document.getElementById('edit-nombre').value = p.nombre ?? '';
     document.getElementById('edit-regalo').value = p.regalo ?? '';
@@ -620,12 +623,17 @@ function fmtDatetimeLocal(d: string | null) {
   }
 
   function openLinksModal() {
-    const nombre     = document.getElementById('edit-nombre').value;
+    const nombre      = document.getElementById('edit-nombre').value;
     const primarySlug = document.getElementById('edit-campaign').value;
-    const source     = document.getElementById('edit-source').value;
-    const medium     = document.getElementById('edit-medium').value;
-    const extras     = document.getElementById('edit-slugs-extra').value
-                         .split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+    const source      = document.getElementById('edit-source').value;
+    const medium      = document.getElementById('edit-medium').value;
+    // Usar slugs_extra del objeto original de la promo para no perder datos guardados
+    const savedExtras = Array.isArray(_currentPromo?.slugs_extra) ? _currentPromo.slugs_extra : [];
+    const textareaExtras = document.getElementById('edit-slugs-extra').value
+                             .split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+    // Combinar: los guardados en DB + los que haya en el textarea (por si se añadieron sin guardar)
+    const extras = [...new Set([...savedExtras, ...textareaExtras])]
+                     .filter(s => s && s !== primarySlug);
 
     document.getElementById('links-modal-nombre').textContent = nombre;
 
