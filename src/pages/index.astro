@@ -19,6 +19,7 @@ import { getConfig } from "../lib/configuracion";
 const utmCampaign = Astro.url.searchParams.get('utm_campaign') ?? '';
 const utmSource   = Astro.url.searchParams.get('utm_source') ?? '';
 const utmMedium   = Astro.url.searchParams.get('utm_medium') ?? '';
+const esLanding   = !!(utmSource || utmMedium || utmCampaign);
 
 const [promocion, smsActivo] = await Promise.all([
   getPromocionActiva(),
@@ -72,9 +73,9 @@ const faqs = [
   </Layout>
 ) : (
 <Layout>
-	{(promocion || utmSource || utmMedium || utmCampaign) && <CountdownBar promocion={promocion} />}
-	{(promocion || utmSource || utmMedium || utmCampaign) ? <HeaderLanding /> : <Header />}
-	{(promocion || utmSource || utmMedium || utmCampaign) && <PromoPopup promocion={promocion} />}
+	{esLanding && <CountdownBar promocion={promocion} />}
+	{esLanding ? <HeaderLanding /> : <Header />}
+	{esLanding && <PromoPopup promocion={promocion} />}
 
 	<main class="bg-body">
 		<div id="hero">
